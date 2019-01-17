@@ -80,6 +80,13 @@ class Round(FunctionTransformer):
 
 class LinearTransformer(FunctionTransformer):
     @property
+    def _inv_kw_args(self):
+        add = - self.add / self.multiply
+        multiply = 1.0 / self.multiply
+
+        return {'add': add, 'multiply': multiply}
+
+    @property
     def _kw_args(self):
         return {'add': self.add, 'multiply': self.multiply}
 
@@ -97,6 +104,8 @@ class LinearTransformer(FunctionTransformer):
             accept_sparse=accept_sparse,
             check_inverse=False,
             func=linear_transform,
+            inverse_func=linear_transform,
+            inv_kw_args=self._inv_kw_args,
             kw_args=self._kw_args,
             validate=validate
         )
@@ -104,6 +113,7 @@ class LinearTransformer(FunctionTransformer):
     def set_params(self, **params):
         super().set_params(**params)
 
+        self.inv_kw_args = self._inv_kw_args
         self.kw_args = self._kw_args
 
 
