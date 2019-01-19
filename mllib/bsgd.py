@@ -213,8 +213,10 @@ def bsgd(
             if n_SV > max_support:
                 abs_dual_coef = np.abs(dual_coef)
                 removed = np.argmin(abs_dual_coef)
-                support_vectors = np.delete(support_vectors, removed, axis=0)
-                dual_coef = np.delete(dual_coef, removed)
+                mask = np.ones(n_SV, dtype=bool)
+                mask[removed] = False
+                support_vectors = support_vectors[mask]
+                dual_coef = dual_coef[mask]
 
                 LOGGER.info(f'removed the {removed + 1}-th support vector')
 
