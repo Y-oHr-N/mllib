@@ -1,11 +1,24 @@
 import numpy as np
 from sklearn.preprocessing import FunctionTransformer
 
-__all__ = ['Clip', 'LinearTransformer', 'Log1P', 'Round', 'linear_transform']
+__all__ = ['Clip', 'Affine', 'Log1P', 'Round', 'affine']
 
 
-def linear_transform(X, add=0.0, multiply=1.0):
-    return add + multiply * X
+def affine(X, A=1.0, b=0.0, inverse=False):
+    X = np.asarray(X)
+    A = np.asarray(A)
+    b = np.asarray(b)
+
+    if inverse:
+        if A.ndim < 2:
+            return (X - b) / A
+        else:
+            return (X - b) @ np.linalg.inv(A)
+    else:
+        if A.ndim < 2:
+            return X * A + b
+        else:
+            return X @ A + b
 
 
 class Clip(FunctionTransformer):
@@ -78,33 +91,30 @@ class Round(FunctionTransformer):
         self.kw_args = self._kw_args
 
 
-class LinearTransformer(FunctionTransformer):
+class Affine(FunctionTransformer):
     @property
     def _inv_kw_args(self):
-        add = - self.add / self.multiply
-        multiply = 1.0 / self.multiply
-
-        return {'add': add, 'multiply': multiply}
+        return {'A': self.A, 'b': self.b, 'inverse': True}
 
     @property
     def _kw_args(self):
-        return {'add': self.add, 'multiply': self.multiply}
+        return {'A': self.A, 'b': self.b}
 
     def __init__(
         self,
         accept_sparse=False,
-        add=0.0,
-        multiply=1.0,
+        A=1.0,
+        b=0.0,
         validate=True
     ):
-        self.add = add
-        self.multiply = multiply
+        self.A = A
+        self.b = b
 
         super().__init__(
             accept_sparse=accept_sparse,
             check_inverse=False,
-            func=linear_transform,
-            inverse_func=linear_transform,
+            func=affine,
+            inverse_func=affine,
             inv_kw_args=self._inv_kw_args,
             kw_args=self._kw_args,
             validate=validate
@@ -137,5 +147,5 @@ if '__name__' == '__main__':
 
     check_estimator(Clip)
     check_estimator(Round)
-    check_estimator(LinearTransformer)
+    check_estimator(Affine)
     check_estimator(Log1P)
