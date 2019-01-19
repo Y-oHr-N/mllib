@@ -21,6 +21,42 @@ def affine(X, A=1.0, b=0.0, inverse=False):
             return X @ A + b
 
 
+class Affine(FunctionTransformer):
+    @property
+    def _inv_kw_args(self):
+        return {'A': self.A, 'b': self.b, 'inverse': True}
+
+    @property
+    def _kw_args(self):
+        return {'A': self.A, 'b': self.b}
+
+    def __init__(
+        self,
+        accept_sparse=False,
+        A=1.0,
+        b=0.0,
+        validate=True
+    ):
+        self.A = A
+        self.b = b
+
+        super().__init__(
+            accept_sparse=accept_sparse,
+            check_inverse=False,
+            func=affine,
+            inverse_func=affine,
+            inv_kw_args=self._inv_kw_args,
+            kw_args=self._kw_args,
+            validate=validate
+        )
+
+    def set_params(self, **params):
+        super().set_params(**params)
+
+        self.inv_kw_args = self._inv_kw_args
+        self.kw_args = self._kw_args
+
+
 class Clip(FunctionTransformer):
     @property
     def _data_max(self):
@@ -64,6 +100,21 @@ class Clip(FunctionTransformer):
         self.kw_args = self._kw_args
 
 
+class Log1P(FunctionTransformer):
+    def __init__(
+        self,
+        accept_sparse=False,
+        validate=True
+    ):
+        super().__init__(
+            accept_sparse=accept_sparse,
+            check_inverse=False,
+            func=np.log1p,
+            inverse_func=np.expm1,
+            validate=validate
+        )
+
+
 class Round(FunctionTransformer):
     @property
     def _kw_args(self):
@@ -91,61 +142,10 @@ class Round(FunctionTransformer):
         self.kw_args = self._kw_args
 
 
-class Affine(FunctionTransformer):
-    @property
-    def _inv_kw_args(self):
-        return {'A': self.A, 'b': self.b, 'inverse': True}
-
-    @property
-    def _kw_args(self):
-        return {'A': self.A, 'b': self.b}
-
-    def __init__(
-        self,
-        accept_sparse=False,
-        A=1.0,
-        b=0.0,
-        validate=True
-    ):
-        self.A = A
-        self.b = b
-
-        super().__init__(
-            accept_sparse=accept_sparse,
-            check_inverse=False,
-            func=affine,
-            inverse_func=affine,
-            inv_kw_args=self._inv_kw_args,
-            kw_args=self._kw_args,
-            validate=validate
-        )
-
-    def set_params(self, **params):
-        super().set_params(**params)
-
-        self.inv_kw_args = self._inv_kw_args
-        self.kw_args = self._kw_args
-
-
-class Log1P(FunctionTransformer):
-    def __init__(
-        self,
-        accept_sparse=False,
-        validate=True
-    ):
-        super().__init__(
-            accept_sparse=accept_sparse,
-            check_inverse=False,
-            func=np.log1p,
-            inverse_func=np.expm1,
-            validate=validate
-        )
-
-
 if '__name__' == '__main__':
     from sklearn.utils.estimator_checks import check_estimator
 
-    check_estimator(Clip)
-    check_estimator(Round)
     check_estimator(Affine)
+    check_estimator(Clip)
     check_estimator(Log1P)
+    check_estimator(Round)
