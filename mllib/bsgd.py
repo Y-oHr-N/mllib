@@ -281,9 +281,10 @@ def _decision_function(
 
 
 class BSGD(BaseEstimator, ABC):
-    # TODO: add a BNorma class
-    # TODO: add a BPegasos class
-    # TODO: add a BSGDClassifier class
+    # TODO: add a BNormaClassifier class
+    # TODO: add a BNormaRegressor class
+    # TODO: add a BPegasosClassifier class
+    # TODO: add a BPegasosRegressor class
     # TODO: add a sumloss_ attribute
     # TODO: add a batch_size parameter
     # TODO: add a n_iter_no_change parameter
@@ -377,7 +378,12 @@ class BSGD(BaseEstimator, ABC):
         if not isinstance(self.warm_start, bool):
             raise ValueError(f'warm_start must be either True or False')
 
-    def _check_sample_weight(self, sample_weight, n_samples):
+    def _check_sample_weight(
+        self,
+        sample_weight: np.ndarray,
+        n_samples: int,
+    ) -> np.ndarray:
+
         if sample_weight is None:
             sample_weight = np.ones(n_samples)
         else:
