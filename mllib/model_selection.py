@@ -22,12 +22,14 @@ class Objective:
         X,
         y=None,
         cv=5,
+        fit_params=None,
         scoring=None
     ):
         self.X = X
         self.y = y
         self.cv = cv
         self.estimator = estimator
+        self.fit_params = fit_params
         self.param_distributions = param_distributions
         self.scoring = scoring
 
@@ -47,6 +49,7 @@ class Objective:
             self.y,
             cv=self.cv,
             error_score=np.nan,
+            fit_params=self.fit_params,
             scoring=self.scoring
         )
 
@@ -132,7 +135,7 @@ class OptunaSearchCV(BaseEstimator):
         self.timeout = timeout
         self.verbose = verbose
 
-    def fit(self, X, y=None):
+    def fit(self, X, y=None, **fit_params):
         random_state = check_random_state(self.random_state)
         seed = random_state.randint(0, np.iinfo(np.int32).max)
         sampler = TPESampler(seed=seed)
@@ -142,6 +145,7 @@ class OptunaSearchCV(BaseEstimator):
             X,
             y,
             cv=self.cv,
+            fit_params=fit_params,
             scoring=self.scoring
         )
 
