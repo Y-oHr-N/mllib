@@ -54,21 +54,21 @@ class Objective:
         return - np.mean(scores)
 
 
-class OptunaSearchCV(BaseEstimator):
+class TPESearchCV(BaseEstimator):
     """Class for hyper parameter search with cross-validation.
 
     Examples
     --------
-    >>> from mllib.model_selection import OptunaSearchCV
+    >>> from mllib.model_selection import TPESearchCV
     >>> from optuna.distributions import LogUniformDistribution
     >>> from sklearn.datasets import load_iris
     >>> from sklearn.svm import SVC
     >>> clf = SVC(gamma='auto')
     >>> param_distributions = {'C': LogUniformDistribution(1e-10, 1e+10)}
     >>> X, y = load_iris(return_X_y=True)
-    >>> optuna_search = OptunaSearchCV(clf, param_distributions)
-    >>> optuna_search.fit(X, y) # doctest: +ELLIPSIS
-    OptunaSearchCV(...)
+    >>> tpe_search = TPESearchCV(clf, param_distributions)
+    >>> tpe_search.fit(X, y) # doctest: +ELLIPSIS
+    TPESearchCV(...)
     """
 
     @property
