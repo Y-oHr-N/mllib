@@ -2,7 +2,7 @@ import numpy as np
 import optuna
 from sklearn.base import BaseEstimator, clone
 from sklearn.metrics import check_scoring
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_validate
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
 
@@ -39,17 +39,22 @@ class Objective:
 
         estimator.set_params(**params)
 
-        scores = cross_val_score(
+        cv_results = cross_validate(
             estimator,
             self.X,
             self.y,
             cv=self.cv,
             error_score=np.nan,
             fit_params=self.fit_params,
+            return_train_score=True,
             scoring=self.scoring
         )
 
-        return - np.mean(scores)
+        for k, v in cv_results.items():
+            trial.set_user_attr(f'mean_{k}', np.mean(v))
+            trial.set_user_attr(f'std_{k}', np.std(v))
+
+        return - np.mean(cv_results['test_score'])
 
 
 class TPESearchCV(BaseEstimator):
