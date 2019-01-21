@@ -116,20 +116,26 @@ class TPESearchCV(BaseEstimator):
         estimator,
         param_distributions,
         cv=5,
+        load_if_exists=False,
         n_iter=10,
         n_jobs=1,
         random_state=None,
         scoring=None,
+        storage=None,
+        study_name=None,
         timeout=None,
         verbose=False
     ):
         self.cv = cv
         self.estimator = estimator
+        self.load_if_exists = load_if_exists
         self.n_iter = n_iter
         self.n_jobs = n_jobs
         self.param_distributions = param_distributions
         self.random_state = random_state
         self.scoring = scoring
+        self.storage = storage
+        self.study_name = study_name
         self.timeout = timeout
         self.verbose = verbose
 
@@ -153,7 +159,12 @@ class TPESearchCV(BaseEstimator):
             disable_default_handler()
 
         self.scorer_ = check_scoring(self.estimator, scoring=self.scoring)
-        self.study_ = create_study(sampler=sampler)
+        self.study_ = create_study(
+            load_if_exists=self.load_if_exists,
+            sampler=sampler,
+            storage=self.storage,
+            study_name=self.study_name
+        )
 
         self.study_.optimize(
             objective,
