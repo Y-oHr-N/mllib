@@ -1,7 +1,5 @@
 import numpy as np
-from optuna import create_study
-from optuna.logging import disable_default_handler, enable_default_handler
-from optuna.samplers import TPESampler
+import optuna
 from sklearn.base import BaseEstimator, clone
 from sklearn.metrics import check_scoring
 from sklearn.model_selection import cross_val_score
@@ -142,7 +140,7 @@ class TPESearchCV(BaseEstimator):
     def fit(self, X, y=None, **fit_params):
         random_state = check_random_state(self.random_state)
         seed = random_state.randint(0, np.iinfo(np.int32).max)
-        sampler = TPESampler(seed=seed)
+        sampler = optuna.samplers.TPESampler(seed=seed)
         objective = Objective(
             self.estimator,
             self.param_distributions,
@@ -154,12 +152,12 @@ class TPESearchCV(BaseEstimator):
         )
 
         if self.verbose:
-            enable_default_handler()
+            optuna.logging.set_verbosity(optuna.logging.INFO)
         else:
-            disable_default_handler()
+            optuna.logging.set_verbosity(optuna.logging.WARNING)
 
         self.scorer_ = check_scoring(self.estimator, scoring=self.scoring)
-        self.study_ = create_study(
+        self.study_ = optuna.create_study(
             load_if_exists=self.load_if_exists,
             sampler=sampler,
             storage=self.storage,
