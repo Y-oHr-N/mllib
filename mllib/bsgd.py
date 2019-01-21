@@ -21,8 +21,6 @@ from sklearn.utils import (
 from sklearn.utils.validation import check_is_fitted
 from tqdm import tqdm, trange
 
-__all__ = ['bsgd', 'BSGDRegressor']
-
 LOGGER = getLogger(__name__)
 LOSS_CLASSES = {
     'epsilon_insensitive': EpsilonInsensitive,

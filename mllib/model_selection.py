@@ -8,8 +8,6 @@ from sklearn.model_selection import cross_val_score
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
 
-__all__ = ['OptunaSearchCV']
-
 
 class Objective:
     """Objective function.

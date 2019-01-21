@@ -1,7 +1,5 @@
 from time import perf_counter
 
-__all__ = ['compute_execution_time']
-
 DEFAULT_N_TRIALS = 10
 
 
