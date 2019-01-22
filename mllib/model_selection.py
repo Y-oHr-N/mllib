@@ -75,6 +75,10 @@ class TPESearchCV(BaseEstimator):
     """
 
     @property
+    def _estimator_type(self):
+        return self.estimator._estimator_type
+
+    @property
     def best_params_(self):
         self._check_is_fitted()
 
