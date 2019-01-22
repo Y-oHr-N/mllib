@@ -76,42 +76,62 @@ class TPESearchCV(BaseEstimator):
 
     @property
     def best_params_(self):
+        self._check_is_fitted()
+
         return self.study_.best_params
 
     @property
     def best_score_(self):
+        self._check_is_fitted()
+
         return - self.best_value_
 
     @property
     def best_trial_(self):
+        self._check_is_fitted()
+
         return self.study_.best_trial
 
     @property
     def best_value_(self):
+        self._check_is_fitted()
+
         return self.study_.best_value
 
     @property
     def decision_function(self):
+        self._check_is_fitted()
+
         return self.best_estimator_.decision_function
 
     @property
     def inverse_transform(self):
+        self._check_is_fitted()
+
         return self.best_estimator_.inverse_transform
 
     @property
     def predict(self):
+        self._check_is_fitted()
+
         return self.best_estimator_.predict
 
     @property
     def predict_log_proba(self):
+        self._check_is_fitted()
+
         return self.best_estimator_.predict_log_proba
 
     @property
     def predict_proba(self):
+        self._check_is_fitted()
+
         return self.best_estimator_.predict_proba
 
     @property
     def transform(self):
+        self._check_is_fitted()
+
         return self.best_estimator_.transform
 
     def __init__(
@@ -141,6 +161,9 @@ class TPESearchCV(BaseEstimator):
         self.study_name = study_name
         self.timeout = timeout
         self.verbose = verbose
+
+    def _check_is_fitted(self):
+        check_is_fitted(self, ['best_estimator_', 'scorer_', 'study_'])
 
     def fit(self, X, y=None, **fit_params):
         random_state = check_random_state(self.random_state)
@@ -184,7 +207,7 @@ class TPESearchCV(BaseEstimator):
         return self
 
     def score(self, X, y):
-        check_is_fitted(self, ['best_estimator_', 'scorer_', 'study_'])
+        self._check_is_fitted()
 
         return self.scorer_(self.best_estimator_, X, y)
 
