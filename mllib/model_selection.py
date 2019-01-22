@@ -147,7 +147,7 @@ class TPESearchCV(BaseEstimator):
         storage=None,
         study_name=None,
         timeout=None,
-        verbose=False
+        verbose=0
     ):
         self.cv = cv
         self.estimator = estimator
@@ -166,6 +166,13 @@ class TPESearchCV(BaseEstimator):
         check_is_fitted(self, ['best_estimator_', 'scorer_', 'study_'])
 
     def fit(self, X, y=None, **fit_params):
+        if self.verbose > 1:
+            optuna.logging.set_verbosity(optuna.logging.DEBUG)
+        elif self.verbose > 0:
+            optuna.logging.set_verbosity(optuna.logging.INFO)
+        else:
+            optuna.logging.set_verbosity(optuna.logging.WARNING)
+
         random_state = check_random_state(self.random_state)
         seed = random_state.randint(0, np.iinfo(np.int32).max)
         sampler = optuna.samplers.TPESampler(seed=seed)
@@ -179,11 +186,6 @@ class TPESearchCV(BaseEstimator):
             scoring=self.scoring
         )
 
-        if self.verbose:
-            optuna.logging.set_verbosity(optuna.logging.INFO)
-        else:
-            optuna.logging.set_verbosity(optuna.logging.WARNING)
-
         self.scorer_ = check_scoring(self.estimator, scoring=self.scoring)
         self.study_ = optuna.create_study(
             load_if_exists=self.load_if_exists,
@@ -191,6 +193,7 @@ class TPESearchCV(BaseEstimator):
             storage=self.storage,
             study_name=self.study_name
         )
+        self.best_estimator_ = clone(self.estimator)
 
         self.study_.optimize(
             objective,
@@ -198,8 +201,6 @@ class TPESearchCV(BaseEstimator):
             n_trials=self.n_iter,
             timeout=self.timeout
         )
-
-        self.best_estimator_ = clone(self.estimator)
 
         self.best_estimator_.set_params(**self.study_.best_params)
         self.best_estimator_.fit(X, y)
