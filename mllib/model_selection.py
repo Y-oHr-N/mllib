@@ -18,6 +18,7 @@ class Objective:
         X,
         y=None,
         cv=5,
+        error_score='raise',
         fit_params=None,
         return_train_score=False,
         scoring=None
@@ -25,6 +26,7 @@ class Objective:
         self.X = X
         self.y = y
         self.cv = cv
+        self.error_score = error_score
         self.estimator = estimator
         self.fit_params = fit_params
         self.param_distributions = param_distributions
@@ -46,7 +48,7 @@ class Objective:
             self.X,
             self.y,
             cv=self.cv,
-            error_score=np.nan,
+            error_score=self.error_score,
             fit_params=self.fit_params,
             return_train_score=self.return_train_score,
             scoring=self.scoring
@@ -145,6 +147,7 @@ class TPESearchCV(BaseEstimator):
         estimator,
         param_distributions,
         cv=5,
+        error_score='raise',
         load_if_exists=False,
         n_iter=10,
         n_jobs=1,
@@ -157,6 +160,7 @@ class TPESearchCV(BaseEstimator):
         verbose=0
     ):
         self.cv = cv
+        self.error_score = error_score
         self.estimator = estimator
         self.load_if_exists = load_if_exists
         self.n_iter = n_iter
@@ -190,6 +194,7 @@ class TPESearchCV(BaseEstimator):
             X,
             y,
             cv=self.cv,
+            error_score=self.error_score,
             fit_params=fit_params,
             return_train_score=self.return_train_score,
             scoring=self.scoring
