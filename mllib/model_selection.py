@@ -19,6 +19,7 @@ class Objective:
         y=None,
         cv=5,
         fit_params=None,
+        return_train_score=False,
         scoring=None
     ):
         self.X = X
@@ -27,6 +28,7 @@ class Objective:
         self.estimator = estimator
         self.fit_params = fit_params
         self.param_distributions = param_distributions
+        self.return_train_score = return_train_score
         self.scoring = scoring
 
     def __call__(self, trial):
@@ -46,7 +48,7 @@ class Objective:
             cv=self.cv,
             error_score=np.nan,
             fit_params=self.fit_params,
-            return_train_score=True,
+            return_train_score=self.return_train_score,
             scoring=self.scoring
         )
 
@@ -147,6 +149,7 @@ class TPESearchCV(BaseEstimator):
         n_iter=10,
         n_jobs=1,
         random_state=None,
+        return_train_score=False,
         scoring=None,
         storage=None,
         study_name=None,
@@ -160,6 +163,7 @@ class TPESearchCV(BaseEstimator):
         self.n_jobs = n_jobs
         self.param_distributions = param_distributions
         self.random_state = random_state
+        self.return_train_score = return_train_score
         self.scoring = scoring
         self.storage = storage
         self.study_name = study_name
@@ -187,6 +191,7 @@ class TPESearchCV(BaseEstimator):
             y,
             cv=self.cv,
             fit_params=fit_params,
+            return_train_score=self.return_train_score,
             scoring=self.scoring
         )
 
