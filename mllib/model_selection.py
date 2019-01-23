@@ -1,8 +1,8 @@
 import numpy as np
 import optuna
-from sklearn.base import BaseEstimator, clone
+from sklearn.base import BaseEstimator, clone, is_classifier
 from sklearn.metrics import check_scoring
-from sklearn.model_selection import cross_validate
+from sklearn.model_selection import check_cv, cross_validate
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
 
@@ -145,6 +145,9 @@ class TPESearchCV(BaseEstimator):
     ----------
     best_estimator_
         Estimator that was chosen by the search.
+
+    n_splits_
+        Number of cross-validation splits.
 
     scorer_
         Scorer function.
@@ -298,7 +301,10 @@ class TPESearchCV(BaseEstimator):
         self.verbose = verbose
 
     def _check_is_fitted(self):
-        check_is_fitted(self, ['best_estimator_', 'scorer_', 'study_'])
+        check_is_fitted(
+            self,
+            ['best_estimator_', 'n_splits', 'scorer_', 'study_']
+        )
 
     def fit(self, X, y=None, **fit_params):
         """Run fit with all sets of parameters.
@@ -327,6 +333,8 @@ class TPESearchCV(BaseEstimator):
         else:
             optuna.logging.set_verbosity(optuna.logging.WARNING)
 
+        classifier = is_classifier(self.estimator)
+        cv = check_cv(self.cv, y, classifier)
         random_state = check_random_state(self.random_state)
         seed = random_state.randint(0, np.iinfo(np.int32).max)
         sampler = optuna.samplers.TPESampler(seed=seed)
@@ -335,13 +343,14 @@ class TPESearchCV(BaseEstimator):
             self.param_distributions,
             X,
             y,
-            cv=self.cv,
+            cv=cv,
             error_score=self.error_score,
             fit_params=fit_params,
             return_train_score=self.return_train_score,
             scoring=self.scoring
         )
 
+        self.n_splits_ = cv.get_n_splits(X, y)
         self.scorer_ = check_scoring(self.estimator, scoring=self.scoring)
         self.study_ = optuna.create_study(
             load_if_exists=self.load_if_exists,
