@@ -225,7 +225,7 @@ class TPESearchCV(BaseEstimator):
 
         return self
 
-    def score(self, X, y):
+    def score(self, X, y=None):
         self._check_is_fitted()
 
         return self.scorer_(self.best_estimator_, X, y)
