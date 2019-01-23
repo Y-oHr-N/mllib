@@ -152,6 +152,7 @@ class TPESearchCV(BaseEstimator):
         n_iter=10,
         n_jobs=1,
         random_state=None,
+        refit=True,
         return_train_score=False,
         scoring=None,
         storage=None,
@@ -167,6 +168,7 @@ class TPESearchCV(BaseEstimator):
         self.n_jobs = n_jobs
         self.param_distributions = param_distributions
         self.random_state = random_state
+        self.refit = refit
         self.return_train_score = return_train_score
         self.scoring = scoring
         self.storage = storage
@@ -207,7 +209,6 @@ class TPESearchCV(BaseEstimator):
             storage=self.storage,
             study_name=self.study_name
         )
-        self.best_estimator_ = clone(self.estimator)
 
         self.study_.optimize(
             objective,
@@ -216,8 +217,11 @@ class TPESearchCV(BaseEstimator):
             timeout=self.timeout
         )
 
-        self.best_estimator_.set_params(**self.study_.best_params)
-        self.best_estimator_.fit(X, y)
+        if self.refit:
+            self.best_estimator_ = clone(self.estimator)
+
+            self.best_estimator_.set_params(**self.study_.best_params)
+            self.best_estimator_.fit(X, y)
 
         return self
 
