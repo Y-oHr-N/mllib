@@ -9,6 +9,35 @@ from sklearn.utils.validation import check_is_fitted
 
 class Objective:
     """Objective function.
+
+    Parameters
+    ----------
+    estimator
+        Object to use to fit the data.
+
+    param_distributions
+        Dictionary where keys are parameters and values are distributions.
+
+    X
+        Training data.
+
+    y
+        Target variable.
+
+    cv
+        Cross-validation strategy.
+
+    error_score
+        Value to assign to the score if an error occurs in estimator fitting.
+
+    fit_params
+        Parameters passed to the ``fit`` method of the estimator.
+
+    return_train_score
+        If True, training scores will be included.
+
+    scoring
+        String or callable to evaluate the predictions on the test data.
     """
 
     def __init__(
@@ -62,7 +91,66 @@ class Objective:
 
 
 class TPESearchCV(BaseEstimator):
-    """Class for hyper parameter search with cross-validation.
+    """Hyper parameter search with cross-validation.
+
+    Parameters
+    ----------
+    estimator
+        Object to use to fit the data.
+
+    param_distributions
+        Dictionary where keys are parameters and values are distributions.
+
+    cv
+        Cross-validation strategy.
+
+    error_score
+        Value to assign to the score if an error occurs in estimator fitting.
+
+    load_if_exists
+        If True, the existing study is used in the case where a study named
+        ``study_name`` already exists in the ``storage``.
+
+    n_iter
+        Number of trials.
+
+    n_jobs
+        Number of parallel jobs.
+
+    random_state
+        Seed of the pseudo random number generator.
+
+    return_train_score
+        If True, training scores will be included.
+
+    refit
+        If True, refit the estimator with the best found parameters.
+
+    scoring
+        String or callable to evaluate the predictions on the test data.
+
+    storage
+        Database URL.
+
+    study_name
+        name of the ``Study``.
+
+    timeout
+        Time limit in seconds for the search of appropriate models.
+
+    verbose
+        Verbosity level.
+
+    Attributes
+    ----------
+    best_estimator_
+        Estimator that was chosen by the search.
+
+    scorer_
+        Scorer function.
+
+    study_
+        Study corresponds to the optimization task.
 
     Examples
     --------
@@ -72,8 +160,8 @@ class TPESearchCV(BaseEstimator):
     >>> from sklearn.svm import SVC
     >>> clf = SVC(gamma='auto')
     >>> param_distributions = {'C': LogUniformDistribution(1e-10, 1e+10)}
-    >>> X, y = load_iris(return_X_y=True)
     >>> tpe_search = TPESearchCV(clf, param_distributions)
+    >>> X, y = load_iris(return_X_y=True)
     >>> tpe_search.fit(X, y) # doctest: +ELLIPSIS
     TPESearchCV(...)
     """
@@ -84,60 +172,93 @@ class TPESearchCV(BaseEstimator):
 
     @property
     def best_params_(self):
+        """Parameters of the best trial in the ``Study``.
+        """
+
         self._check_is_fitted()
 
         return self.study_.best_params
 
     @property
     def best_score_(self):
+        """Mean cross-validated score of the best estimator.
+        """
+
         self._check_is_fitted()
 
         return - self.best_value_
 
     @property
     def best_trial_(self):
+        """Best trial in the ``Study``.
+        """
+
         self._check_is_fitted()
 
         return self.study_.best_trial
 
     @property
     def best_value_(self):
+        """Best objective value in the ``Study``.
+        """
+
         self._check_is_fitted()
 
         return self.study_.best_value
 
     @property
     def decision_function(self):
+        """Call decision_function on the estimator with the best found
+        parameters.
+        """
+
         self._check_is_fitted()
 
         return self.best_estimator_.decision_function
 
     @property
     def inverse_transform(self):
+        """Call inverse_transform on the estimator with the best found
+        parameters.
+        """
+
         self._check_is_fitted()
 
         return self.best_estimator_.inverse_transform
 
     @property
     def predict(self):
+        """Call predict on the estimator with the best found parameters.
+        """
+
         self._check_is_fitted()
 
         return self.best_estimator_.predict
 
     @property
     def predict_log_proba(self):
+        """Call predict_log_proba on the estimator with the best found
+        parameters.
+        """
+
         self._check_is_fitted()
 
         return self.best_estimator_.predict_log_proba
 
     @property
     def predict_proba(self):
+        """Call predict_proba on the estimator with the best found parameters.
+        """
+
         self._check_is_fitted()
 
         return self.best_estimator_.predict_proba
 
     @property
     def transform(self):
+        """Call transform on the estimator with the best found parameters.
+        """
+
         self._check_is_fitted()
 
         return self.best_estimator_.transform
@@ -180,6 +301,25 @@ class TPESearchCV(BaseEstimator):
         check_is_fitted(self, ['best_estimator_', 'scorer_', 'study_'])
 
     def fit(self, X, y=None, **fit_params):
+        """Run fit with all sets of parameters.
+
+        Parameters
+        ----------
+        X
+            Training data.
+
+        y
+            Target variable.
+
+        **fit_params
+            Parameters passed to the ``fit`` method of the estimator.
+
+        Returns
+        -------
+        self
+            Return self.
+        """
+
         if self.verbose > 1:
             optuna.logging.set_verbosity(optuna.logging.DEBUG)
         elif self.verbose > 0:
@@ -226,6 +366,22 @@ class TPESearchCV(BaseEstimator):
         return self
 
     def score(self, X, y=None):
+        """Return the score on the given data.
+
+        Parameters
+        ----------
+        X
+            Data.
+
+        y
+            Target variable.
+
+        Returns
+        -------
+        score
+            Scaler score.
+        """
+
         self._check_is_fitted()
 
         return self.scorer_(self.best_estimator_, X, y)
