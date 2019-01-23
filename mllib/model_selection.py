@@ -83,9 +83,13 @@ class Objective:
             scoring=self.scoring
         )
 
-        for k, v in cv_results.items():
-            trial.set_user_attr(f'mean_{k}', np.mean(v))
-            trial.set_user_attr(f'std_{k}', np.std(v))
+        for name, array in cv_results.items():
+            if name in ['test_score', 'train_score']:
+                for i, score in enumerate(array):
+                    trial.set_user_attr(f'split{i}_{name}', score)
+
+            trial.set_user_attr(f'mean_{name}', np.mean(array))
+            trial.set_user_attr(f'std_{name}', np.std(array))
 
         return - np.mean(cv_results['test_score'])
 
