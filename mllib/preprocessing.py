@@ -66,7 +66,7 @@ class Clip(FunctionTransformer):
     @property
     def _data_min(self):
         if self.data_min is None:
-            return -np.inf
+            return - np.inf
 
         return self.data_min
 
