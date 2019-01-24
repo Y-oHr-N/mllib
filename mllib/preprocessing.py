@@ -138,12 +138,3 @@ class Round(FunctionTransformer):
         super().set_params(**params)
 
         self.kw_args = self._kw_args
-
-
-if '__name__' == '__main__':
-    from sklearn.utils.estimator_checks import check_estimator
-
-    check_estimator(Affine)
-    check_estimator(Clip)
-    check_estimator(Log1P)
-    check_estimator(Round)
