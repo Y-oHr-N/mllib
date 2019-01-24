@@ -275,6 +275,15 @@ class TPESearchCV(BaseEstimator):
 
         return self.best_estimator_.transform
 
+    @property
+    def trials_dataframe(self):
+        """Call trials_dataframe on the ``Study``.
+        """
+
+        self._check_is_fitted()
+
+        return self.study_.trials_dataframe
+
     def __init__(
         self,
         estimator,
