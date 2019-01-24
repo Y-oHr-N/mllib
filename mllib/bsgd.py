@@ -295,7 +295,6 @@ class BSGD(BaseEstimator, ABC):
     # TODO: correct the shape of a intercept_ attribute
     # TODO: implement a bsgd function with Cython (or Numba)
     # TODO: implement a nbsgd function
-    # TODO: write doctest examples
 
     @abstractmethod
     def __init__(
@@ -541,6 +540,15 @@ class BSGDRegressor(BSGD, RegressorMixin):
     t_
         Round.
 
+    Examples
+    --------
+    >>> from mllib.bsgd import BSGDRegressor
+    >>> from sklearn.datasets import load_boston
+    >>> reg = BSGDRegressor(kernel='rbf')
+    >>> X, y = load_boston(return_X_y=True)
+    >>> reg.fit(X, y) # doctest: +ELLIPSIS
+    BSGDRegressor(...)
+
     References
     ----------
     Wang, Z., Crammer, K. and Vucetic, S.
@@ -677,7 +685,7 @@ class BSGDRegressor(BSGD, RegressorMixin):
         )
 
 
-if '__name__' == '__main__':
-    from sklearn.utils.estimator_checks import check_estimator
+if __name__ == '__main__':
+    import doctest
 
-    check_estimator(BSGDRegressor)
+    doctest.testmod()
