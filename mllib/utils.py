@@ -1,7 +1,5 @@
 from time import perf_counter
 
-from sklearn.pipeline import Pipeline
-
 DEFAULT_N_TRIALS = 10
 
 
@@ -9,7 +7,7 @@ def is_lgbm_model(estimator):
     try:
         import lightgbm as lgb
 
-        if isinstance(estimator, Pipeline):
+        while hasattr(estimator, '_final_estimator'):
             estimator = estimator._final_estimator
 
         return isinstance(estimator, lgb.LGBMModel)
@@ -22,7 +20,7 @@ def is_xgb_model(estimator):
     try:
         import xgboost as xgb
 
-        if isinstance(estimator, Pipeline):
+        while hasattr(estimator, '_final_estimator'):
             estimator = estimator._final_estimator
 
         return isinstance(estimator, xgb.XGBModel)
