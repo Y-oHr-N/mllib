@@ -285,7 +285,6 @@ class BSGD(BaseEstimator, ABC):
     # TODO: add a BNormaRegressor class
     # TODO: add a BPegasosClassifier class
     # TODO: add a BPegasosRegressor class
-    # TODO: add a sumloss_ attribute
     # TODO: add a batch_size parameter
     # TODO: add a n_iter_no_change parameter
     # TODO: add a n_jobs parameter
@@ -368,13 +367,13 @@ class BSGD(BaseEstimator, ABC):
         if self.power_t < 0.0:
             raise ValueError(f'power_t must be >= 0, got {self.power_t}')
 
-        if not isinstance(self.shuffle, bool):
+        if type(self.shuffle) is not bool:
             raise ValueError(f'shuffle must be either True or False')
 
-        if not isinstance(self.verbose, bool):
+        if type(self.verbose) is not bool:
             raise ValueError(f'verbose must be either True or False')
 
-        if not isinstance(self.warm_start, bool):
+        if type(self.warm_start) is not bool:
             raise ValueError(f'warm_start must be either True or False')
 
     def _check_sample_weight(
@@ -669,7 +668,10 @@ class BSGDRegressor(BSGD, RegressorMixin):
             Predicted values.
         """
 
-        check_is_fitted(self, ['dual_coef_', 'support_vectors_', 't_'])
+        check_is_fitted(
+            self,
+            ['dual_coef_', 'intercept_', 'support_vectors_', 't_']
+        )
 
         X = check_array(X, estimator=self)
 
