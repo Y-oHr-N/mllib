@@ -1,3 +1,5 @@
+from time import perf_counter
+
 import numpy as np
 import optuna
 from sklearn.base import BaseEstimator, clone, is_classifier
@@ -152,6 +154,9 @@ class TPESearchCV(BaseEstimator):
 
     n_splits_
         Number of cross-validation splits.
+
+    refit_time_
+        Time for refitting the best estimator.
 
     scorer_
         Scorer function.
@@ -374,7 +379,12 @@ class TPESearchCV(BaseEstimator):
             self.best_estimator_ = clone(self.estimator)
 
             self.best_estimator_.set_params(**self.study_.best_params)
+
+            start_time = perf_counter()
+
             self.best_estimator_.fit(X, y)
+
+            self.refit_time_ = perf_counter() - start_time
 
         return self
 
