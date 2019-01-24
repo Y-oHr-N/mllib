@@ -1,7 +1,10 @@
+import logging
 from time import perf_counter
 
 import numpy as np
-import optuna
+from optuna import create_study
+from optuna.logging import set_verbosity
+from optuna.samplers import TPESampler
 from sklearn.base import BaseEstimator, clone, is_classifier
 from sklearn.metrics import check_scoring
 from sklearn.model_selection import check_cv, cross_validate
@@ -345,17 +348,17 @@ class TPESearchCV(BaseEstimator):
         """
 
         if self.verbose > 1:
-            optuna.logging.set_verbosity(optuna.logging.DEBUG)
+            set_verbosity(logging.DEBUG)
         elif self.verbose > 0:
-            optuna.logging.set_verbosity(optuna.logging.INFO)
+            set_verbosity(logging.INFO)
         else:
-            optuna.logging.set_verbosity(optuna.logging.WARNING)
+            set_verbosity(logging.WARNING)
 
         classifier = is_classifier(self.estimator)
         cv = check_cv(self.cv, y, classifier)
         random_state = check_random_state(self.random_state)
         seed = random_state.randint(0, np.iinfo(np.int32).max)
-        sampler = optuna.samplers.TPESampler(seed=seed)
+        sampler = TPESampler(seed=seed)
         objective = Objective(
             self.estimator,
             self.param_distributions,
@@ -370,7 +373,7 @@ class TPESearchCV(BaseEstimator):
 
         self.n_splits_ = cv.get_n_splits(X, y)
         self.scorer_ = check_scoring(self.estimator, scoring=self.scoring)
-        self.study_ = optuna.create_study(
+        self.study_ = create_study(
             load_if_exists=self.load_if_exists,
             sampler=sampler,
             storage=self.storage,
