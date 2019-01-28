@@ -326,7 +326,7 @@ class TPESearchCV(BaseEstimator):
     def _check_is_fitted(self):
         check_is_fitted(
             self,
-            ['best_estimator_', 'n_splits', 'scorer_', 'study_']
+            ['best_estimator_', 'n_splits_', 'scorer_', 'study_']
         )
 
     def fit(self, X, y=None, **fit_params):
