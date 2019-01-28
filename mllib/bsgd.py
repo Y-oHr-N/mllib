@@ -15,8 +15,7 @@ from sklearn.utils import (
     check_X_y,
     check_array,
     check_random_state,
-    gen_batches,
-    resample
+    gen_batches
 )
 from sklearn.utils.validation import check_is_fitted
 from tqdm import tqdm, trange
@@ -33,7 +32,7 @@ def bsgd(
     X: np.ndarray,
     y: np.ndarray,
     sample_weight: np.ndarray,
-    random_state: np.random.RandomState,
+    seed: int,
     support_vectors: np.ndarray,
     dual_coef: np.ndarray,
     intercept: float,
@@ -67,7 +66,7 @@ def bsgd(
     sample_weight
         Weights applied to individual samples.
 
-    random_state
+    seed
         Seed of the pseudo random number generator.
 
     support_vectors
@@ -142,6 +141,7 @@ def bsgd(
         Round.
     """
 
+    random_state = np.random.RandomState(seed)
     loss_function = _get_loss_function(loss=loss, epsilon=epsilon)
     disable = not(verbose)
     epochs = trange(max_iter, disable=disable)
@@ -151,13 +151,13 @@ def bsgd(
 
     for _ in epochs:
         if shuffle:
-            X, y, sample_weight = resample(
-                X,
-                y,
-                sample_weight,
-                random_state=random_state,
-                replace=False
-            )
+            indices = np.arange(n_samples)
+
+            random_state.shuffle(indices)
+
+            X = X[indices]
+            y = y[indices]
+            sample_weight = sample_weight[indices]
 
         for batch in batches:
             X_batch = X[batch]
@@ -619,6 +619,7 @@ class BSGDRegressor(BaseSGD, RegressorMixin):
         n_samples, n_features = X.shape
         sample_weight = self._check_sample_weight(sample_weight, n_samples)
         random_state = check_random_state(self.random_state)
+        seed = random_state.randint(0, np.iinfo(np.int32).max)
 
         if not hasattr(self, 'support_vectors_'):
             self.support_vectors_ = np.empty((0, n_features))
@@ -633,7 +634,7 @@ class BSGDRegressor(BaseSGD, RegressorMixin):
                 X,
                 y,
                 sample_weight,
-                random_state,
+                seed,
                 self.support_vectors_,
                 self.dual_coef_,
                 self.intercept_,
