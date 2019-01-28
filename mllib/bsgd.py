@@ -280,7 +280,7 @@ def _decision_function(
     return K @ dual_coef + intercept
 
 
-class BSGD(BaseEstimator, ABC):
+class BaseSGD(BaseEstimator, ABC):
     # TODO: add a BNormaClassifier class
     # TODO: add a BNormaRegressor class
     # TODO: add a BPegasosClassifier class
@@ -334,6 +334,17 @@ class BSGD(BaseEstimator, ABC):
         self.shuffle = shuffle
         self.verbose = verbose
         self.warm_start = warm_start
+
+    @abstractmethod
+    def _partial_fit(
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        sample_weight: np.ndarray,
+        max_iter: int
+    ) -> BaseEstimator:
+
+        pass
 
     def _check_is_fitted(self) -> None:
         check_is_fitted(
@@ -462,19 +473,8 @@ class BSGD(BaseEstimator, ABC):
 
         return self._partial_fit(X, y, sample_weight, 1)
 
-    @abstractmethod
-    def _partial_fit(
-        self,
-        X: np.ndarray,
-        y: np.ndarray,
-        sample_weight: np.ndarray,
-        max_iter: int
-    ) -> BaseEstimator:
 
-        pass
-
-
-class BSGDRegressor(BSGD, RegressorMixin):
+class BSGDRegressor(BaseSGD, RegressorMixin):
     """BSGD Regressor.
 
     Parameters
