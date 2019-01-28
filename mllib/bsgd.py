@@ -335,6 +335,12 @@ class BSGD(BaseEstimator, ABC):
         self.verbose = verbose
         self.warm_start = warm_start
 
+    def _check_is_fitted(self) -> None:
+        check_is_fitted(
+            self,
+            ['dual_coef_', 'intercept_', 'support_vectors_', 't_']
+        )
+
     def _check_params(self) -> None:
         if self.alpha < 0.0:
             raise ValueError(f'alpha must be >= 0, got {self.alpha}')
@@ -668,10 +674,7 @@ class BSGDRegressor(BSGD, RegressorMixin):
             Predicted values.
         """
 
-        check_is_fitted(
-            self,
-            ['dual_coef_', 'intercept_', 'support_vectors_', 't_']
-        )
+        self._check_is_fitted()
 
         X = check_array(X, estimator=self)
 
