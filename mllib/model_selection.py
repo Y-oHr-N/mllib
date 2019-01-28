@@ -329,6 +329,14 @@ class TPESearchCV(BaseEstimator):
             ['best_estimator_', 'n_splits_', 'scorer_', 'study_']
         )
 
+    def _set_verbosity(self):
+        if self.verbose > 1:
+            set_verbosity(logging.DEBUG)
+        elif self.verbose > 0:
+            set_verbosity(logging.INFO)
+        else:
+            set_verbosity(logging.WARNING)
+
     def fit(self, X, y=None, **fit_params):
         """Run fit with all sets of parameters.
 
@@ -349,12 +357,7 @@ class TPESearchCV(BaseEstimator):
             Return self.
         """
 
-        if self.verbose > 1:
-            set_verbosity(logging.DEBUG)
-        elif self.verbose > 0:
-            set_verbosity(logging.INFO)
-        else:
-            set_verbosity(logging.WARNING)
+        self._set_verbosity()
 
         classifier = is_classifier(self.estimator)
         cv = check_cv(self.cv, y, classifier)

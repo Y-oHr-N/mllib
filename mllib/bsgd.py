@@ -1,5 +1,5 @@
+import logging
 from abc import abstractmethod, ABC
-from logging import getLogger
 from typing import Tuple, Union
 
 import numpy as np
@@ -20,12 +20,13 @@ from sklearn.utils import (
 from sklearn.utils.validation import check_is_fitted
 from tqdm import tqdm, trange
 
-LOGGER = getLogger(__name__)
 LOSS_CLASSES = {
     'epsilon_insensitive': EpsilonInsensitive,
     'huber': Huber,
     'squared_loss': SquaredLoss
 }
+
+logger = logging.getLogger(__name__)
 
 
 def bsgd(
@@ -51,7 +52,7 @@ def bsgd(
     max_support: int = 100,
     power_t: float = 0.25,
     shuffle: bool = True,
-    verbose: bool = False
+    verbose: int = 0
 ) -> Tuple[np.ndarray, np.ndarray, float, int]:
     """Budgeted Stochastic Gradient Descent (BSGD).
 
@@ -124,7 +125,7 @@ def bsgd(
         If True, shuffle the data.
 
     verbose
-        Enable verbose output.
+        Verbosity level.
 
     Returns
     -------
@@ -143,7 +144,7 @@ def bsgd(
 
     random_state = np.random.RandomState(seed)
     loss_function = _get_loss_function(loss=loss, epsilon=epsilon)
-    disable = not(verbose)
+    disable = verbose <= 0
     epochs = trange(max_iter, disable=disable)
     n_samples, _ = X.shape
     generator = gen_batches(n_samples, 1)
@@ -204,7 +205,7 @@ def bsgd(
                 if fit_intercept:
                     intercept += update
 
-                LOGGER.info('added the support vector')
+                logger.debug('added the support vector')
 
             n_SV, _ = support_vectors.shape
 
@@ -216,7 +217,7 @@ def bsgd(
                 support_vectors = support_vectors[mask]
                 dual_coef = dual_coef[mask]
 
-                LOGGER.info(f'removed the {removed + 1}-th support vector')
+                logger.debug(f'removed the {removed + 1}-th support vector')
 
             t += 1
 
@@ -313,7 +314,7 @@ class BaseSGD(BaseEstimator, ABC):
         power_t: float = 0.25,
         random_state: Union[int, np.random.RandomState] = None,
         shuffle: bool = True,
-        verbose: bool = False,
+        verbose: int = 0,
         warm_start: bool = False
     ) -> None:
 
@@ -387,9 +388,6 @@ class BaseSGD(BaseEstimator, ABC):
         if type(self.shuffle) is not bool:
             raise ValueError(f'shuffle must be either True or False')
 
-        if type(self.verbose) is not bool:
-            raise ValueError(f'verbose must be either True or False')
-
         if type(self.warm_start) is not bool:
             raise ValueError(f'warm_start must be either True or False')
 
@@ -416,6 +414,14 @@ class BaseSGD(BaseEstimator, ABC):
             del self.intercept_
 
         self.t_ = 1
+
+    def _set_verbosity(self) -> None:
+        if self.verbose > 1:
+            logger.setLevel(logging.DEBUG)
+        elif self.verbose > 0:
+            logger.setLevel(logging.INFO)
+        else:
+            logger.setLevel(logging.WARNING)
 
     def fit(
         self,
@@ -525,7 +531,7 @@ class BSGDRegressor(BaseSGD, RegressorMixin):
         If True, shuffle the data.
 
     verbose
-        Enable verbose output.
+        Verbosity level.
 
     warm_start
         If True, reuse the solution of the previous call to fit as
@@ -581,7 +587,7 @@ class BSGDRegressor(BaseSGD, RegressorMixin):
         power_t: float = 0.25,
         random_state: Union[int, np.random.RandomState] = None,
         shuffle: bool = True,
-        verbose: bool = False,
+        verbose: int = 0,
         warm_start: bool = False
     ) -> None:
 
@@ -614,6 +620,7 @@ class BSGDRegressor(BaseSGD, RegressorMixin):
     ) -> BaseEstimator:
 
         self._check_params()
+        self._set_verbosity()
 
         X, y = check_X_y(X, y, estimator=self)
         n_samples, n_features = X.shape
