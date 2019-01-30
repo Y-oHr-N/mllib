@@ -1,4 +1,4 @@
-import logging
+import sys
 from abc import abstractmethod, ABC
 from typing import Tuple, Union
 
@@ -25,8 +25,6 @@ LOSS_CLASSES = {
     'huber': Huber,
     'squared_loss': SquaredLoss
 }
-
-logger = logging.getLogger(__name__)
 
 
 def bsgd(
@@ -145,10 +143,10 @@ def bsgd(
     random_state = np.random.RandomState(seed)
     loss_function = _get_loss_function(loss=loss, epsilon=epsilon)
     disable = verbose <= 0
-    epochs = trange(max_iter, disable=disable)
+    epochs = trange(max_iter, desc='epoch loop', disable=disable)
     n_samples, _ = X.shape
     generator = gen_batches(n_samples, 1)
-    batches = tqdm(generator, disable=disable, leave=False)
+    batches = tqdm(generator, desc='round loop', disable=disable, leave=False)
 
     for _ in epochs:
         if shuffle:
@@ -205,7 +203,8 @@ def bsgd(
                 if fit_intercept:
                     intercept += update
 
-                logger.debug('added the support vector')
+                if verbose > 1:
+                    tqdm.write('added the support vector', file=sys.stderr)
 
             n_SV, _ = support_vectors.shape
 
@@ -217,7 +216,11 @@ def bsgd(
                 support_vectors = support_vectors[mask]
                 dual_coef = dual_coef[mask]
 
-                logger.debug(f'removed the {removed + 1}-th support vector')
+                if verbose > 1:
+                    tqdm.write(
+                        f'removed the {removed + 1}-th support vector',
+                        file=sys.stderr
+                    )
 
             t += 1
 
@@ -414,14 +417,6 @@ class BaseSGD(BaseEstimator, ABC):
             del self.intercept_
 
         self.t_ = 1
-
-    def _set_verbosity(self) -> None:
-        if self.verbose > 1:
-            logger.setLevel(logging.DEBUG)
-        elif self.verbose > 0:
-            logger.setLevel(logging.INFO)
-        else:
-            logger.setLevel(logging.WARNING)
 
     def fit(
         self,
@@ -620,7 +615,6 @@ class BSGDRegressor(BaseSGD, RegressorMixin):
     ) -> BaseEstimator:
 
         self._check_params()
-        self._set_verbosity()
 
         X, y = check_X_y(X, y, estimator=self)
         n_samples, n_features = X.shape
