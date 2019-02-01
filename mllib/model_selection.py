@@ -38,6 +38,10 @@ class Objective:
     fit_params
         Parameters passed to the ``fit`` method of the estimator.
 
+    groups
+        Group labels for the samples used while splitting the dataset into
+        train/test set.
+
     return_train_score
         If True, training scores will be included.
 
@@ -54,6 +58,7 @@ class Objective:
         cv=5,
         error_score='raise',
         fit_params=None,
+        groups=None,
         return_train_score=False,
         scoring=None
     ):
@@ -63,6 +68,7 @@ class Objective:
         self.error_score = error_score
         self.estimator = estimator
         self.fit_params = fit_params
+        self.groups = groups
         self.param_distributions = param_distributions
         self.return_train_score = return_train_score
         self.scoring = scoring
@@ -84,6 +90,7 @@ class Objective:
             cv=self.cv,
             error_score=self.error_score,
             fit_params=self.fit_params,
+            groups=self.groups,
             return_train_score=self.return_train_score,
             scoring=self.scoring
         )
@@ -337,7 +344,7 @@ class TPESearchCV(BaseEstimator):
         else:
             set_verbosity(logging.WARNING)
 
-    def fit(self, X, y=None, **fit_params):
+    def fit(self, X, y=None, groups=None, **fit_params):
         """Run fit with all sets of parameters.
 
         Parameters
@@ -347,6 +354,10 @@ class TPESearchCV(BaseEstimator):
 
         y
             Target variable.
+
+        groups
+            Group labels for the samples used while splitting the dataset into
+            train/test set.
 
         **fit_params
             Parameters passed to the ``fit`` method of the estimator.
@@ -372,6 +383,7 @@ class TPESearchCV(BaseEstimator):
             cv=cv,
             error_score=self.error_score,
             fit_params=fit_params,
+            groups=groups,
             return_train_score=self.return_train_score,
             scoring=self.scoring
         )
