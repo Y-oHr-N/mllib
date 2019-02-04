@@ -2,9 +2,6 @@ import logging
 from time import perf_counter
 
 import numpy as np
-from optuna import create_study
-from optuna.logging import set_verbosity
-from optuna.samplers import TPESampler
 from sklearn.base import BaseEstimator, clone, is_classifier
 from sklearn.metrics import check_scoring
 from sklearn.model_selection import check_cv, cross_validate
@@ -337,6 +334,8 @@ class TPESearchCV(BaseEstimator):
         )
 
     def _set_verbosity(self):
+        from optuna.logging import set_verbosity
+
         if self.verbose > 1:
             set_verbosity(logging.DEBUG)
         elif self.verbose > 0:
@@ -367,6 +366,9 @@ class TPESearchCV(BaseEstimator):
         self
             Return self.
         """
+
+        from optuna import create_study
+        from optuna.samplers import TPESampler
 
         self._set_verbosity()
 
