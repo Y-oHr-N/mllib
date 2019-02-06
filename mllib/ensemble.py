@@ -6,6 +6,10 @@ from sklearn.utils import check_random_state
 
 
 class BaseRandomSeedAveraging(BaseEstimator, ABC):
+    # TODO: add a RandomSeedAveragingClassifier class
+    # TODO: add a n_jobs parameter
+    # TODO: add a verbose parameter
+
     @abstractmethod
     def __init__(
         self,
