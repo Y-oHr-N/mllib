@@ -22,9 +22,12 @@ class BaseRandomSeedAveraging(BaseEstimator, ABC):
         self.random_state = random_state
 
     def _check_params(self):
-        params = self.base_estimator.get_params()
+        if not isinstance(self.base_estimator, BaseEstimator):
+            raise ValueError(
+                f'base_estimator must be a scikit-learn estimator'
+            )
 
-        if 'random_state' not in params:
+        if not hasattr(self.base_estimator, 'random_state'):
             raise ValueError(
                 f'base_estimator must have random_state'
             )
