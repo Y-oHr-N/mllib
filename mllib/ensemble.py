@@ -73,6 +73,7 @@ class RandomSeedAveragingRegressor(BaseRandomSeedAveraging, RegressorMixin):
     >>> X, y = load_boston(return_X_y=True)
     >>> reg.fit(X, y) # doctest: +ELLIPSIS
     RandomSeedAveragingRegressor(...)
+    >>> y_pred = reg.predict(X)
     """
 
     def __init__(

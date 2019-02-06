@@ -185,6 +185,7 @@ class TPESearchCV(BaseEstimator):
     >>> X, y = load_iris(return_X_y=True)
     >>> tpe_search.fit(X, y) # doctest: +ELLIPSIS
     TPESearchCV(...)
+    >>> y_pred = tpe_search.predict(X)
     """
 
     @property

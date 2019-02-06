@@ -574,6 +574,7 @@ class BSGDRegressor(BaseSGD, RegressorMixin):
     >>> X, y = load_boston(return_X_y=True)
     >>> reg.fit(X, y) # doctest: +ELLIPSIS
     BSGDRegressor(...)
+    >>> y_pred = reg.predict(X)
 
     References
     ----------
