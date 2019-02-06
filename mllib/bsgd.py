@@ -474,6 +474,26 @@ class BaseSGD(BaseEstimator, ABC):
 
         return self._partial_fit(X, y, sample_weight, 1)
 
+    @abstractmethod
+    def predict(
+        self,
+        X: np.ndarray
+    ) -> np.ndarray:
+        """Predict using the Fitted model.
+
+        Parameters
+        ----------
+        X
+            Data.
+
+        Returns
+        -------
+        y_pred
+            Predicted values.
+        """
+
+        pass
+
 
 class BSGDRegressor(BaseSGD, RegressorMixin):
     """BSGD Regressor.
