@@ -328,10 +328,12 @@ class TPESearchCV(BaseEstimator):
         self.verbose = verbose
 
     def _check_is_fitted(self):
-        check_is_fitted(
-            self,
-            ['best_estimator_', 'n_splits_', 'scorer_', 'study_']
-        )
+        attributes = ['n_splits_', 'scorer_', 'study_']
+
+        if self.refit:
+            attributes += ['best_estimator_']
+
+        check_is_fitted(self, attributes)
 
     def _set_verbosity(self):
         from optuna.logging import set_verbosity
