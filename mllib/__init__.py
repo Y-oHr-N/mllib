@@ -1,6 +1,7 @@
 import logging
 
 from . import bsgd # noqa
+from . import ensemble # noqa
 from . import metrics # noqa
 from . import model_selection # noqa
 from . import preprocessing # noqa
