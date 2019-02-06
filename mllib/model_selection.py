@@ -97,7 +97,7 @@ class Objective:
                 for i, score in enumerate(array):
                     trial.set_user_attr(f'split{i}_{name}', score)
 
-            trial.set_user_attr(f'mean_{name}', np.mean(array))
+            trial.set_user_attr(f'mean_{name}', np.average(array))
             trial.set_user_attr(f'std_{name}', np.std(array))
 
         user_attrs = trial.user_attrs
