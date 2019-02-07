@@ -87,7 +87,9 @@ class RandomSeedAveragingRegressor(BaseRandomSeedAveraging, RegressorMixin):
         self.random_state = random_state
 
     def predict(self, X):
-        return np.average([e.predict(X) for e in self.estimators_])
+        predictions = np.asarray([e.predict(X) for e in self.estimators_]).T
+
+        return np.average(predictions, axis=1)
 
 
 if __name__ == '__main__':
