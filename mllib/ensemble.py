@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 from sklearn.base import BaseEstimator, RegressorMixin, clone
 from sklearn.utils import check_random_state
+from sklearn.utils.validation import check_is_fitted
 
 
 class BaseRandomSeedAveraging(BaseEstimator, ABC):
@@ -20,6 +21,9 @@ class BaseRandomSeedAveraging(BaseEstimator, ABC):
         self.base_estimator = base_estimator
         self.n_estimators = n_estimators
         self.random_state = random_state
+
+    def _check_is_fitted(self):
+        check_is_fitted(self, 'estimators_')
 
     def _check_params(self):
         if not isinstance(self.base_estimator, BaseEstimator):
@@ -87,6 +91,8 @@ class RandomSeedAveragingRegressor(BaseRandomSeedAveraging, RegressorMixin):
         self.random_state = random_state
 
     def predict(self, X):
+        self._check_is_fitted()
+
         predictions = np.asarray([e.predict(X) for e in self.estimators_]).T
 
         return np.average(predictions, axis=1)
