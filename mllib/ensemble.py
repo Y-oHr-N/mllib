@@ -1,13 +1,14 @@
+import warnings
 from abc import ABC, abstractmethod
 
 import numpy as np
-from sklearn.base import BaseEstimator, RegressorMixin, clone
+from scipy import stats
+from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin, clone
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
 
 
 class BaseRandomSeedAveraging(BaseEstimator, ABC):
-    # TODO: add a RandomSeedAveragingClassifier class
     # TODO: add a n_jobs parameter
     # TODO: add a verbose parameter
 
@@ -98,6 +99,47 @@ class RandomSeedAveragingRegressor(BaseRandomSeedAveraging, RegressorMixin):
         predictions = np.asarray([e.predict(X) for e in self.estimators_]).T
 
         return np.average(predictions, axis=1)
+
+
+class RandomSeedAveragingClassifier(BaseRandomSeedAveraging, ClassifierMixin):
+    """Random seed averaging classifier.
+
+    examples
+    --------
+    >>> from mllib.ensemble import RandomSeedAveragingClassifier
+    >>> from sklearn.datasets import load_iris
+    >>> from sklearn.ensemble import RandomForestClassifier
+    >>> est = RandomForestClassifier(n_estimators=10)
+    >>> clf = RandomSeedAveragingClassifier(est)
+    >>> X, y = load_iris(return_X_y=True)
+    >>> clf.fit(X, y) # doctest: +ELLIPSIS
+    RandomSeedAveragingClassifier(...)
+    >>> y_pred = clf.predict(X)
+    """
+
+    def __init__(
+        self,
+        base_estimator,
+        n_estimators=10,
+        random_state=None
+    ):
+        super().__init__(
+            base_estimator=base_estimator,
+            n_estimators=n_estimators,
+            random_state=random_state
+        )
+
+    def predict(self, X):
+        self._check_is_fitted()
+
+        predictions = np.asarray([e.predict(X) for e in self.estimators_]).T
+
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', category=RuntimeWarning)
+
+            mode, _ = stats.mode(predictions, axis=1)
+
+        return np.ravel(mode)
 
 
 if __name__ == '__main__':
