@@ -49,13 +49,13 @@ class BaseRandomSeedAveraging(BaseEstimator, ABC):
         self.estimators_ = []
 
         for _ in range(self.n_estimators):
-            estimator = clone(self.base_estimator)
+            e = clone(self.base_estimator)
             seed = random_state.randint(0, np.iinfo(np.int32).max)
 
-            estimator.set_params(random_state=seed)
-            estimator.fit(X, y, **fit_params)
+            e.set_params(random_state=seed)
+            e.fit(X, y, **fit_params)
 
-            self.estimators_.append(estimator)
+            self.estimators_.append(e)
 
         return self
 
@@ -86,9 +86,11 @@ class RandomSeedAveragingRegressor(BaseRandomSeedAveraging, RegressorMixin):
         n_estimators=10,
         random_state=None
     ):
-        self.base_estimator = base_estimator
-        self.n_estimators = n_estimators
-        self.random_state = random_state
+        super().__init__(
+            base_estimator=base_estimator,
+            n_estimators=n_estimators,
+            random_state=random_state
+        )
 
     def predict(self, X):
         self._check_is_fitted()
