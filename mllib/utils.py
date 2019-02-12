@@ -3,32 +3,6 @@ from time import perf_counter
 DEFAULT_N_TRIALS = 10
 
 
-def is_lgbm_model(estimator):
-    try:
-        import lightgbm as lgb
-
-        while hasattr(estimator, '_final_estimator'):
-            estimator = estimator._final_estimator
-
-        return isinstance(estimator, lgb.LGBMModel)
-
-    except ImportError:
-        return False
-
-
-def is_xgb_model(estimator):
-    try:
-        import xgboost as xgb
-
-        while hasattr(estimator, '_final_estimator'):
-            estimator = estimator._final_estimator
-
-        return isinstance(estimator, xgb.XGBModel)
-
-    except ImportError:
-        return False
-
-
 def compute_execution_time(func, *args, **kwargs):
     n_trials = kwargs.pop('n_trials', DEFAULT_N_TRIALS)
     start_time = perf_counter()
@@ -66,3 +40,29 @@ def get_param_distributions(estimator_name):
     }
 
     return dict_of_param_distributions[estimator_name]
+
+
+def is_lgbm_model(estimator):
+    try:
+        import lightgbm as lgb
+
+        while hasattr(estimator, '_final_estimator'):
+            estimator = estimator._final_estimator
+
+        return isinstance(estimator, lgb.LGBMModel)
+
+    except ImportError:
+        return False
+
+
+def is_xgb_model(estimator):
+    try:
+        import xgboost as xgb
+
+        while hasattr(estimator, '_final_estimator'):
+            estimator = estimator._final_estimator
+
+        return isinstance(estimator, xgb.XGBModel)
+
+    except ImportError:
+        return False
