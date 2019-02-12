@@ -37,3 +37,32 @@ def compute_execution_time(func, *args, **kwargs):
         func(*args, **kwargs)
 
     return (perf_counter() - start_time) / n_trials
+
+
+def get_param_distributions(estimator_name):
+    from optuna.distributions import (
+        CategoricalDistribution,
+        DiscreteUniformDistribution,
+        IntUniformDistribution
+    )
+
+    dict_of_param_distributions = {
+        'RandomForestClassifier': {
+            'bootstrap': CategoricalDistribution([True, False]),
+            'class_weight': CategoricalDistribution(['balanced', None]),
+            'criterion': CategoricalDistribution(['entropy', 'gini']),
+            'max_depth': IntUniformDistribution(3, 10),
+            'max_features': DiscreteUniformDistribution(0.05, 1.0, 0.05),
+            'min_samples_leaf': IntUniformDistribution(1, 20),
+            'min_samples_split': IntUniformDistribution(2, 20)
+        },
+        'RandomForestRegressor': {
+            'bootstrap': CategoricalDistribution([True, False]),
+            'max_depth': IntUniformDistribution(3, 10),
+            'max_features': DiscreteUniformDistribution(0.05, 1.0, 0.05),
+            'min_samples_leaf': IntUniformDistribution(1, 20),
+            'min_samples_split': IntUniformDistribution(2, 20)
+        }
+    }
+
+    return dict_of_param_distributions[estimator_name]
