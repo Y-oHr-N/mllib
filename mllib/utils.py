@@ -17,10 +17,20 @@ def get_param_distributions(estimator_name):
     from optuna.distributions import (
         CategoricalDistribution,
         DiscreteUniformDistribution,
-        IntUniformDistribution
+        IntUniformDistribution,
+        LogUniformDistribution
     )
 
     dict_of_param_distributions = {
+        'GradientBoostingClassifier': {
+            'learning_rate': LogUniformDistribution(0.001, 1.0),
+            'loss': CategoricalDistribution(['deviance', 'exponential']),
+            'max_depth': IntUniformDistribution(3, 10),
+            'max_features': DiscreteUniformDistribution(0.05, 1.0, 0.05),
+            'min_samples_leaf': IntUniformDistribution(1, 20),
+            'min_samples_split': IntUniformDistribution(2, 20),
+            'subsample': DiscreteUniformDistribution(0.05, 1.0, 0.05)
+        },
         'RandomForestClassifier': {
             'bootstrap': CategoricalDistribution([True, False]),
             'class_weight': CategoricalDistribution(['balanced', None]),
@@ -29,6 +39,17 @@ def get_param_distributions(estimator_name):
             'max_features': DiscreteUniformDistribution(0.05, 1.0, 0.05),
             'min_samples_leaf': IntUniformDistribution(1, 20),
             'min_samples_split': IntUniformDistribution(2, 20)
+        },
+        'GradientBoostingRegressor': {
+            'learning_rate': LogUniformDistribution(0.001, 1.0),
+            'loss': CategoricalDistribution(
+                ['huber', 'lad', 'ls', 'quantile']
+            ),
+            'max_depth': IntUniformDistribution(3, 10),
+            'max_features': DiscreteUniformDistribution(0.05, 1.0, 0.05),
+            'min_samples_leaf': IntUniformDistribution(1, 20),
+            'min_samples_split': IntUniformDistribution(2, 20),
+            'subsample': DiscreteUniformDistribution(0.05, 1.0, 0.05)
         },
         'RandomForestRegressor': {
             'bootstrap': CategoricalDistribution([True, False]),
