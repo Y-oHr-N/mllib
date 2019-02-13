@@ -41,6 +41,16 @@ def get_param_distributions(estimator_name):
             'min_samples_leaf': IntUniformDistribution(1, 20),
             'min_samples_split': IntUniformDistribution(2, 20)
         },
+        'XGBClassifier': {
+            'booster': CategoricalDistribution(['gbtree', 'dart']),
+            'colsample_bytree': DiscreteUniformDistribution(0.05, 1.0, 0.05),
+            'learning_rate': LogUniformDistribution(0.001, 1.0),
+            'max_depth': IntUniformDistribution(1, 10),
+            'min_child_weight': IntUniformDistribution(1, 20),
+            'reg_alpha': LogUniformDistribution(1e-06, 1.0),
+            'reg_lambda': LogUniformDistribution(1e-6, 1.0),
+            'subsample': UniformDistribution(0.5, 1.0)
+        },
         'GradientBoostingRegressor': {
             'learning_rate': LogUniformDistribution(0.001, 1.0),
             'loss': CategoricalDistribution(
@@ -58,6 +68,16 @@ def get_param_distributions(estimator_name):
             'max_features': DiscreteUniformDistribution(0.05, 1.0, 0.05),
             'min_samples_leaf': IntUniformDistribution(1, 20),
             'min_samples_split': IntUniformDistribution(2, 20)
+        },
+        'XGBRegressor': {
+            'booster': CategoricalDistribution(['gbtree', 'dart']),
+            'colsample_bytree': DiscreteUniformDistribution(0.05, 1.0, 0.05),
+            'learning_rate': LogUniformDistribution(0.001, 1.0),
+            'max_depth': IntUniformDistribution(1, 10),
+            'min_child_weight': IntUniformDistribution(1, 20),
+            'reg_alpha': LogUniformDistribution(1e-06, 1.0),
+            'reg_lambda': LogUniformDistribution(1e-6, 1.0),
+            'subsample': UniformDistribution(0.5, 1.0)
         }
     }
 
