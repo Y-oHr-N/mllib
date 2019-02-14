@@ -14,6 +14,17 @@ def compute_execution_time(func, *args, **kwargs):
 
 
 def get_param_distributions(estimator_name):
+    """Get a dictionary where keys are parameters and values are
+    distributions.
+
+    Examples
+    --------
+    >>> from mllib.utils import get_param_distributions
+    >>> from sklearn.ensemble import RandomForestClassifier
+    >>> clf = RandomForestClassifier()
+    >>> param_distributions = get_param_distributions(clf.__class__.__name__)
+    """
+
     from optuna.distributions import (
         CategoricalDistribution,
         DiscreteUniformDistribution,
@@ -105,3 +116,9 @@ def is_xgb_model(estimator):
 
     except ImportError:
         return False
+
+
+if __name__ == '__main__':
+    import doctest
+
+    doctest.testmod()
