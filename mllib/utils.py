@@ -43,6 +43,15 @@ def get_param_distributions(estimator_name):
             'min_samples_split': IntUniformDistribution(2, 20),
             'subsample': UniformDistribution(0.5, 1.0)
         },
+        'LGBMClassifier': {
+            'boosting_type': CategoricalDistribution(['gbdt', 'dart']),
+            'colsample_bytree': DiscreteUniformDistribution(0.05, 1.0, 0.05),
+            'learning_rate': LogUniformDistribution(0.001, 1.0),
+            'max_depth': IntUniformDistribution(1, 10),
+            'reg_alpha': LogUniformDistribution(1e-06, 1.0),
+            'reg_lambda': LogUniformDistribution(1e-6, 1.0),
+            'subsample': UniformDistribution(0.5, 1.0)
+        },
         'RandomForestClassifier': {
             'bootstrap': CategoricalDistribution([True, False]),
             'criterion': CategoricalDistribution(['entropy', 'gini']),
@@ -69,6 +78,15 @@ def get_param_distributions(estimator_name):
             'max_features': DiscreteUniformDistribution(0.05, 1.0, 0.05),
             'min_samples_leaf': IntUniformDistribution(1, 20),
             'min_samples_split': IntUniformDistribution(2, 20),
+            'subsample': UniformDistribution(0.5, 1.0)
+        },
+        'LGBMRegressor': {
+            'boosting_type': CategoricalDistribution(['gbdt', 'dart']),
+            'colsample_bytree': DiscreteUniformDistribution(0.05, 1.0, 0.05),
+            'learning_rate': LogUniformDistribution(0.001, 1.0),
+            'max_depth': IntUniformDistribution(1, 10),
+            'reg_alpha': LogUniformDistribution(1e-06, 1.0),
+            'reg_lambda': LogUniformDistribution(1e-6, 1.0),
             'subsample': UniformDistribution(0.5, 1.0)
         },
         'RandomForestRegressor': {
