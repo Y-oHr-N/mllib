@@ -1,5 +1,18 @@
 from time import perf_counter
 
+lgb_is_installed = True
+xgb_is_installed = True
+
+try:
+    import lightgbm as lgb
+except ImportError:
+    lgb_is_installed = False
+
+try:
+    import xgboost as xgb
+except ImportError:
+    xgb_is_installed = False
+
 DEFAULT_N_TRIALS = 10
 
 
@@ -43,15 +56,6 @@ def get_param_distributions(estimator_name):
             'min_samples_split': IntUniformDistribution(2, 20),
             'subsample': UniformDistribution(0.5, 1.0)
         },
-        'LGBMClassifier': {
-            'boosting_type': CategoricalDistribution(['gbdt', 'dart']),
-            'colsample_bytree': DiscreteUniformDistribution(0.05, 1.0, 0.05),
-            'learning_rate': LogUniformDistribution(0.001, 1.0),
-            'max_depth': IntUniformDistribution(1, 10),
-            'reg_alpha': LogUniformDistribution(1e-06, 1.0),
-            'reg_lambda': LogUniformDistribution(1e-6, 1.0),
-            'subsample': UniformDistribution(0.5, 1.0)
-        },
         'RandomForestClassifier': {
             'bootstrap': CategoricalDistribution([True, False]),
             'criterion': CategoricalDistribution(['entropy', 'gini']),
@@ -59,15 +63,6 @@ def get_param_distributions(estimator_name):
             'max_features': DiscreteUniformDistribution(0.05, 1.0, 0.05),
             'min_samples_leaf': IntUniformDistribution(1, 20),
             'min_samples_split': IntUniformDistribution(2, 20)
-        },
-        'XGBClassifier': {
-            'booster': CategoricalDistribution(['gbtree', 'dart']),
-            'colsample_bytree': DiscreteUniformDistribution(0.05, 1.0, 0.05),
-            'learning_rate': LogUniformDistribution(0.001, 1.0),
-            'max_depth': IntUniformDistribution(1, 10),
-            'reg_alpha': LogUniformDistribution(1e-06, 1.0),
-            'reg_lambda': LogUniformDistribution(1e-6, 1.0),
-            'subsample': UniformDistribution(0.5, 1.0)
         },
         'GradientBoostingRegressor': {
             'learning_rate': LogUniformDistribution(0.001, 1.0),
@@ -80,7 +75,17 @@ def get_param_distributions(estimator_name):
             'min_samples_split': IntUniformDistribution(2, 20),
             'subsample': UniformDistribution(0.5, 1.0)
         },
-        'LGBMRegressor': {
+        'RandomForestRegressor': {
+            'bootstrap': CategoricalDistribution([True, False]),
+            'max_depth': IntUniformDistribution(1, 10),
+            'max_features': DiscreteUniformDistribution(0.05, 1.0, 0.05),
+            'min_samples_leaf': IntUniformDistribution(1, 20),
+            'min_samples_split': IntUniformDistribution(2, 20)
+        }
+    }
+
+    if lgb_is_installed:
+        dict_of_param_distributions['LGBMClassifier'] = {
             'boosting_type': CategoricalDistribution(['gbdt', 'dart']),
             'colsample_bytree': DiscreteUniformDistribution(0.05, 1.0, 0.05),
             'learning_rate': LogUniformDistribution(0.001, 1.0),
@@ -88,15 +93,19 @@ def get_param_distributions(estimator_name):
             'reg_alpha': LogUniformDistribution(1e-06, 1.0),
             'reg_lambda': LogUniformDistribution(1e-6, 1.0),
             'subsample': UniformDistribution(0.5, 1.0)
-        },
-        'RandomForestRegressor': {
-            'bootstrap': CategoricalDistribution([True, False]),
+        }
+        dict_of_param_distributions['LGBMRegressor'] = 
+            'boosting_type': CategoricalDistribution(['gbdt', 'dart']),
+            'colsample_bytree': DiscreteUniformDistribution(0.05, 1.0, 0.05),
+            'learning_rate': LogUniformDistribution(0.001, 1.0),
             'max_depth': IntUniformDistribution(1, 10),
-            'max_features': DiscreteUniformDistribution(0.05, 1.0, 0.05),
-            'min_samples_leaf': IntUniformDistribution(1, 20),
-            'min_samples_split': IntUniformDistribution(2, 20)
-        },
-        'XGBRegressor': {
+            'reg_alpha': LogUniformDistribution(1e-06, 1.0),
+            'reg_lambda': LogUniformDistribution(1e-6, 1.0),
+            'subsample': UniformDistribution(0.5, 1.0)
+        }
+
+    if xgb_is_installed:
+        dict_of_param_distributions['XGBClassifier'] = {
             'booster': CategoricalDistribution(['gbtree', 'dart']),
             'colsample_bytree': DiscreteUniformDistribution(0.05, 1.0, 0.05),
             'learning_rate': LogUniformDistribution(0.001, 1.0),
@@ -105,35 +114,37 @@ def get_param_distributions(estimator_name):
             'reg_lambda': LogUniformDistribution(1e-6, 1.0),
             'subsample': UniformDistribution(0.5, 1.0)
         }
-    }
+        dict_of_param_distributions['XGBRegressor'] = {
+            'booster': CategoricalDistribution(['gbtree', 'dart']),
+            'colsample_bytree': DiscreteUniformDistribution(0.05, 1.0, 0.05),
+            'learning_rate': LogUniformDistribution(0.001, 1.0),
+            'max_depth': IntUniformDistribution(1, 10),
+            'reg_alpha': LogUniformDistribution(1e-06, 1.0),
+            'reg_lambda': LogUniformDistribution(1e-6, 1.0),
+            'subsample': UniformDistribution(0.5, 1.0)
+        }
 
     return dict_of_param_distributions[estimator_name]
 
 
 def is_lgbm_model(estimator):
-    try:
-        import lightgbm as lgb
-
-        while hasattr(estimator, '_final_estimator'):
-            estimator = estimator._final_estimator
-
-        return isinstance(estimator, lgb.LGBMModel)
-
-    except ImportError:
+    if not lgb_is_installed:
         return False
+
+    while hasattr(estimator, '_final_estimator'):
+        estimator = estimator._final_estimator
+
+    return isinstance(estimator, lgb.LGBMModel)
 
 
 def is_xgb_model(estimator):
-    try:
-        import xgboost as xgb
-
-        while hasattr(estimator, '_final_estimator'):
-            estimator = estimator._final_estimator
-
-        return isinstance(estimator, xgb.XGBModel)
-
-    except ImportError:
+    if not xgb_is_installed:
         return False
+
+    while hasattr(estimator, '_final_estimator'):
+        estimator = estimator._final_estimator
+
+    return isinstance(estimator, xgb.XGBModel)
 
 
 if __name__ == '__main__':
