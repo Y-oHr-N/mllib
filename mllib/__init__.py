@@ -6,6 +6,7 @@ from . import metrics # noqa
 from . import model_selection # noqa
 from . import preprocessing # noqa
 from . import utils # noqa
+from . import visualization # noqa
 
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler()
