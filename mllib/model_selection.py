@@ -336,6 +336,19 @@ class TPESearchCV(BaseEstimator):
 
         check_is_fitted(self, attributes)
 
+    def _refit(self, X, y, **fit_params):
+        self.best_estimator_ = clone(self.estimator)
+
+        self.best_estimator_.set_params(**self.study_.best_params)
+
+        start_time = perf_counter()
+
+        self.best_estimator_.fit(X, y, **fit_params)
+
+        self.refit_time_ = perf_counter() - start_time
+
+        return self
+
     def _set_verbosity(self):
         from optuna.logging import set_verbosity
 
@@ -410,15 +423,7 @@ class TPESearchCV(BaseEstimator):
         )
 
         if self.refit:
-            self.best_estimator_ = clone(self.estimator)
-
-            self.best_estimator_.set_params(**self.study_.best_params)
-
-            start_time = perf_counter()
-
-            self.best_estimator_.fit(X, y)
-
-            self.refit_time_ = perf_counter() - start_time
+            self._refit(X, y, **fit_params)
 
         return self
 
