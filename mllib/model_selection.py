@@ -8,6 +8,15 @@ from sklearn.model_selection import check_cv, cross_validate
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
 
+optuna_is_installed = True
+
+try:
+    from optuna import create_study
+    from optuna.logging import set_verbosity
+    from optuna.samplers import TPESampler
+except ImportError:
+    optuna_is_installed = False
+
 
 class Objective:
     """Objective function.
@@ -312,6 +321,9 @@ class TPESearchCV(BaseEstimator):
         timeout=None,
         verbose=0
     ):
+        if not optuna_is_installed:
+            raise ImportError('optuna is not installed')
+
         self.cv = cv
         self.error_score = error_score
         self.estimator = estimator
@@ -350,8 +362,6 @@ class TPESearchCV(BaseEstimator):
         return self
 
     def _set_verbosity(self):
-        from optuna.logging import set_verbosity
-
         if self.verbose > 1:
             set_verbosity(logging.DEBUG)
         elif self.verbose > 0:
@@ -382,9 +392,6 @@ class TPESearchCV(BaseEstimator):
         self
             Return self.
         """
-
-        from optuna import create_study
-        from optuna.samplers import TPESampler
 
         self._set_verbosity()
 
