@@ -1,7 +1,19 @@
 from time import perf_counter
 
+optuna_is_installed = True
 lgb_is_installed = True
 xgb_is_installed = True
+
+try:
+    from optuna.distributions import (
+        CategoricalDistribution,
+        DiscreteUniformDistribution,
+        IntUniformDistribution,
+        LogUniformDistribution,
+        UniformDistribution
+    )
+except ImportError:
+    optuna_is_installed = False
 
 try:
     import lightgbm as lgb
@@ -38,13 +50,8 @@ def get_param_distributions(estimator_name):
     >>> param_distributions = get_param_distributions(clf.__class__.__name__)
     """
 
-    from optuna.distributions import (
-        CategoricalDistribution,
-        DiscreteUniformDistribution,
-        IntUniformDistribution,
-        LogUniformDistribution,
-        UniformDistribution
-    )
+    if not optuna_is_installed:
+        raise ImportError('optuna is not installed')
 
     dict_of_param_distributions = {
         'GradientBoostingClassifier': {
@@ -94,7 +101,7 @@ def get_param_distributions(estimator_name):
             'reg_lambda': LogUniformDistribution(1e-6, 1.0),
             'subsample': UniformDistribution(0.5, 1.0)
         }
-        dict_of_param_distributions['LGBMRegressor'] = 
+        dict_of_param_distributions['LGBMRegressor'] = {
             'boosting_type': CategoricalDistribution(['gbdt', 'dart']),
             'colsample_bytree': DiscreteUniformDistribution(0.05, 1.0, 0.05),
             'learning_rate': LogUniformDistribution(0.001, 1.0),
