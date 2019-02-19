@@ -20,6 +20,8 @@ from sklearn.utils import (
 from sklearn.utils.validation import check_is_fitted
 from tqdm import tqdm, trange
 
+from .utils import check_sample_weight
+
 LOSS_CLASSES = {
     'epsilon_insensitive': EpsilonInsensitive,
     'huber': Huber,
@@ -394,22 +396,6 @@ class BaseSGD(BaseEstimator, ABC):
         if type(self.warm_start) is not bool:
             raise ValueError(f'warm_start must be either True or False')
 
-    def _check_sample_weight(
-        self,
-        sample_weight: np.ndarray,
-        n_samples: int,
-    ) -> np.ndarray:
-
-        if sample_weight is None:
-            sample_weight = np.ones(n_samples)
-        else:
-            sample_weight = np.asarray(sample_weight)
-
-        if sample_weight.size != n_samples:
-            raise ValueError('shapes of X and sample_weight do not match')
-
-        return sample_weight
-
     def _reset(self) -> None:
         if not self.warm_start and hasattr(self, 'support_vectors_'):
             del self.support_vectors_
@@ -639,7 +625,7 @@ class BSGDRegressor(BaseSGD, RegressorMixin):
 
         X, y = check_X_y(X, y, estimator=self)
         n_samples, n_features = X.shape
-        sample_weight = self._check_sample_weight(sample_weight, n_samples)
+        sample_weight = check_sample_weight(sample_weight, n_samples)
         random_state = check_random_state(self.random_state)
         seed = random_state.randint(0, np.iinfo(np.int32).max)
 

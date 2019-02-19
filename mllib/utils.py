@@ -1,5 +1,7 @@
 from time import perf_counter
 
+import numpy as np
+
 optuna_is_installed = True
 lgb_is_installed = True
 xgb_is_installed = True
@@ -26,6 +28,21 @@ except ImportError:
     xgb_is_installed = False
 
 DEFAULT_N_TRIALS = 10
+
+
+def check_sample_weight(sample_weight, n_samples):
+    if sample_weight is None:
+        sample_weight = np.ones(n_samples)
+    else:
+        sample_weight = np.asarray(sample_weight)
+
+    if sample_weight.size != n_samples:
+        raise ValueError(f'the size of sample_weight must be {n_samples}')
+
+    if np.any(sample_weight < 0):
+        raise ValueError('individual weights for each sample must be >= 0')
+
+    return sample_weight
 
 
 def compute_execution_time(func, *args, **kwargs):
