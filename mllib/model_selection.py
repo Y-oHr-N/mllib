@@ -12,6 +12,7 @@ optuna_is_installed = True
 
 try:
     from optuna import create_study
+    from optuna.distributions import BaseDistribution
     from optuna.logging import set_verbosity
     from optuna.samplers import TPESampler
 except ImportError:
@@ -348,6 +349,21 @@ class TPESearchCV(BaseEstimator):
 
         check_is_fitted(self, attributes)
 
+    def _check_params(self):
+        if not isinstance(self.estimator, BaseEstimator):
+            raise ValueError(
+                f'estimator must be a scikit-learn estimator'
+            )
+
+        if type(self.param_distributions) is not dict:
+            raise ValueError(f'param_distributions must be a dictionary')
+
+        for name, distribution in self.param_distributions.items():
+            if not isinstance(distribution, BaseDistribution):
+                raise ValueError(
+                    f'value of {name} must be a optuna distribution'
+                )
+
     def _refit(self, X, y, **fit_params):
         self.best_estimator_ = clone(self.estimator)
 
@@ -393,6 +409,7 @@ class TPESearchCV(BaseEstimator):
             Return self.
         """
 
+        self._check_params()
         self._set_verbosity()
 
         classifier = is_classifier(self.estimator)
