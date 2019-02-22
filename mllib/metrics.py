@@ -29,7 +29,7 @@ def mean_absolute_percentage_error(
     )
 
     if np.any(y_true == 0.0):
-        raise ValueError('y_true must not include zeros')
+        raise ValueError(f'y_true must not include zeros')
 
     n_samples, _ = y_true.shape
     sample_weight = check_sample_weight(sample_weight, n_samples)

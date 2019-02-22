@@ -206,7 +206,7 @@ def bsgd(
                     intercept += update
 
                 if verbose > 1:
-                    tqdm.write('added the support vector', file=sys.stderr)
+                    tqdm.write(f'added the support vector', file=sys.stderr)
 
             n_SV, _ = support_vectors.shape
 
@@ -368,7 +368,7 @@ class BaseSGD(BaseEstimator, ABC):
         if self.eta0 * self.alpha >= 1.0:
             raise ValueError(f'eta0 must be < 1 / alpha, got {self.eta0}')
 
-        if not isinstance(self.fit_intercept, bool):
+        if type(self.fit_intercept) is not bool:
             raise ValueError(f'fit_intercept must be either True or False')
 
         if self.learning_rate not in ('constant', 'invscaling'):

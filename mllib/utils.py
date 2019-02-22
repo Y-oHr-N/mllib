@@ -40,7 +40,7 @@ def check_sample_weight(sample_weight, n_samples):
         raise ValueError(f'the size of sample_weight must be {n_samples}')
 
     if np.any(sample_weight < 0):
-        raise ValueError('individual weights for each sample must be >= 0')
+        raise ValueError(f'individual weights for each sample must be >= 0')
 
     return sample_weight
 
