@@ -33,11 +33,8 @@ def mean_absolute_percentage_error(
 
     n_samples, _ = y_true.shape
     sample_weight = check_sample_weight(sample_weight, n_samples)
-    mape = 100.0 * np.average(
-        np.abs((y_true - y_pred) / y_true),
-        axis=0,
-        weights=sample_weight
-    )
+    ape = np.abs((y_true - y_pred) / y_true)
+    mape = np.average(ape, axis=0, weights=sample_weight)
 
     if multioutput == 'raw_values':
         return mape
