@@ -169,9 +169,3 @@ def is_xgb_model(estimator):
         estimator = estimator._final_estimator
 
     return isinstance(estimator, xgb.XGBModel)
-
-
-if __name__ == '__main__':
-    import doctest
-
-    doctest.testmod()

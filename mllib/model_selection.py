@@ -471,9 +471,3 @@ class TPESearchCV(BaseEstimator):
         self._check_is_fitted()
 
         return self.scorer_(self.best_estimator_, X, y)
-
-
-if __name__ == '__main__':
-    import doctest
-
-    doctest.testmod()

@@ -140,9 +140,3 @@ class RandomSeedAveragingClassifier(BaseRandomSeedAveraging, ClassifierMixin):
             mode, _ = stats.mode(predictions, axis=1)
 
         return np.ravel(mode)
-
-
-if __name__ == '__main__':
-    import doctest
-
-    doctest.testmod()
