@@ -36,6 +36,9 @@ def check_sample_weight(sample_weight, n_samples):
     else:
         sample_weight = np.asarray(sample_weight)
 
+    if sample_weight.ndim != 1:
+        raise ValueError(f'sample_weight must be a 1D array')
+
     if sample_weight.size != n_samples:
         raise ValueError(f'the size of sample_weight must be {n_samples}')
 
