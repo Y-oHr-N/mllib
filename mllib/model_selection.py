@@ -198,6 +198,9 @@ class TPESearchCV(BaseEstimator):
     >>> y_pred = tpe_search.predict(X)
     """
 
+    # TODO: add a logic for pruning
+    # TODO: write type annotations
+
     @property
     def _estimator_type(self):
         return self.estimator._estimator_type
