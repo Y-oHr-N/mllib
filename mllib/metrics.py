@@ -57,12 +57,13 @@ def mean_absolute_percentage_error(
         multioutput
     )
 
-    if np.any(y_true == 0.0):
-        raise ValueError(f'y_true must not include zeros')
-
     n_samples, _ = y_true.shape
     sample_weight = check_sample_weight(sample_weight, n_samples)
-    ape = np.abs((y_true - y_pred) / y_true)
+
+    with np.errstate(divide='ignore', invalid='ignore'):
+        ape = np.abs((y_true - y_pred) / y_true)
+
+    ape = np.nan_to_num(ape)
     mape = np.average(ape, axis=0, weights=sample_weight)
 
     if multioutput == 'raw_values':
