@@ -396,7 +396,7 @@ class TPESearchCV(BaseEstimator):
                     f'value of {name} must be a optuna distribution'
                 )
 
-    def _refit(self, X, y, **fit_params):
+    def _refit(self, X, y=None, **fit_params):
         self.best_estimator_ = clone(self.estimator)
 
         self.best_estimator_.set_params(**self.study_.best_params)
@@ -462,7 +462,7 @@ class TPESearchCV(BaseEstimator):
             scoring=self.scoring
         )
 
-        self.n_splits_ = cv.get_n_splits(X, y)
+        self.n_splits_ = cv.get_n_splits(X, y, groups=groups)
         self.scorer_ = check_scoring(self.estimator, scoring=self.scoring)
         self.study_ = create_study(
             load_if_exists=self.load_if_exists,
