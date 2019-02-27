@@ -90,6 +90,11 @@ def get_param_distributions(estimator_name, prefix=None):
             'min_samples_split': IntUniformDistribution(2, 20),
             'subsample': UniformDistribution(0.5, 1.0)
         },
+        'KNeighborsClassifier': {
+            'metric': CategoricalDistribution(['euclidean', 'manhattan']),
+            'n_neighbors': IntUniformDistribution(1, 100),
+            'weights': CategoricalDistribution(['distance', 'uniform'])
+        },
         'RandomForestClassifier': {
             'bootstrap': CategoricalDistribution([True, False]),
             'criterion': CategoricalDistribution(['entropy', 'gini']),
@@ -108,6 +113,11 @@ def get_param_distributions(estimator_name, prefix=None):
             'min_samples_leaf': IntUniformDistribution(1, 20),
             'min_samples_split': IntUniformDistribution(2, 20),
             'subsample': UniformDistribution(0.5, 1.0)
+        },
+        'KNeighborsRegressor': {
+            'metric': CategoricalDistribution(['euclidean', 'manhattan']),
+            'n_neighbors': IntUniformDistribution(1, 100),
+            'weights': CategoricalDistribution(['distance', 'uniform'])
         },
         'RandomForestRegressor': {
             'bootstrap': CategoricalDistribution([True, False]),
