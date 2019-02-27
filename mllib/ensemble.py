@@ -7,6 +7,8 @@ from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin, clone
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
 
+from .utils import is_estimator
+
 
 class BaseRandomSeedAveraging(BaseEstimator, ABC):
     # TODO: add a n_jobs parameter
@@ -27,7 +29,7 @@ class BaseRandomSeedAveraging(BaseEstimator, ABC):
         check_is_fitted(self, 'estimators_')
 
     def _check_params(self):
-        if not isinstance(self.base_estimator, BaseEstimator):
+        if not is_estimator(self.base_estimator):
             raise ValueError(
                 f'base_estimator must be a scikit-learn estimator'
             )

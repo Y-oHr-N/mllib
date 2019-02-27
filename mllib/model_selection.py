@@ -8,6 +8,8 @@ from sklearn.model_selection import check_cv, cross_validate
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
 
+from .utils import is_estimator
+
 optuna_is_installed = True
 
 try:
@@ -382,7 +384,7 @@ class TPESearchCV(BaseEstimator):
         check_is_fitted(self, attributes)
 
     def _check_params(self):
-        if not isinstance(self.estimator, BaseEstimator):
+        if not is_estimator(self.estimator):
             raise ValueError(
                 f'estimator must be a scikit-learn estimator'
             )
