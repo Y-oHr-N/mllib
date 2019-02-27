@@ -206,6 +206,17 @@ class TPESearchCV(BaseEstimator):
         return self.estimator._estimator_type
 
     @property
+    def best_index_(self):
+        """Index which corresponds to the best candidate parameter setting.
+        """
+
+        self._check_is_fitted()
+
+        df = self.trials_dataframe()
+
+        return df['value'].idxmin()
+
+    @property
     def best_params_(self):
         """Parameters of the best trial in the ``Study``.
         """
@@ -240,6 +251,24 @@ class TPESearchCV(BaseEstimator):
         self._check_is_fitted()
 
         return self.study_.best_value
+
+    @property
+    def classes_(self):
+        """Class labels.
+        """
+
+        self._check_is_fitted()
+
+        return self.best_estimator_.classes_
+
+    @property
+    def n_iter_(self):
+        """Actual number of trials.
+        """
+
+        self._check_is_fitted()
+
+        return len(self.study_.trials)
 
     @property
     def decision_function(self):
