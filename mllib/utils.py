@@ -30,6 +30,13 @@ except ImportError:
 DEFAULT_N_TRIALS = 10
 
 
+def add_prefix(dictionary, prefix=None):
+    if prefix is None:
+        return dictionary
+
+    return {prefix + key: value for key, value in dictionary.items()}
+
+
 def check_sample_weight(sample_weight, n_samples):
     if sample_weight is None:
         sample_weight = np.ones(n_samples)
@@ -58,7 +65,7 @@ def compute_execution_time(func, *args, **kwargs):
     return (perf_counter() - start_time) / n_trials
 
 
-def get_param_distributions(estimator_name):
+def get_param_distributions(estimator_name, prefix=None):
     """Get a dictionary where keys are parameters and values are
     distributions.
 
@@ -151,7 +158,9 @@ def get_param_distributions(estimator_name):
             'subsample': UniformDistribution(0.5, 1.0)
         }
 
-    return dict_of_param_distributions[estimator_name]
+    param_distributions = dict_of_param_distributions[estimator_name]
+
+    return add_prefix(param_distributions, prefix)
 
 
 def is_lgbm_model(estimator):
