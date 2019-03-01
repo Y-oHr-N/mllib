@@ -22,7 +22,8 @@ def mean_arctangent_absolute_percentage_error(
     with np.errstate(divide='ignore', invalid='ignore'):
         ape = np.abs((y_true - y_pred) / y_true)
 
-    ape = np.nan_to_num(ape)
+    is_nan = np.isnan(ape)
+    ape[is_nan] = 0.0
     aape = np.arctan(ape)
     maape = np.average(aape, axis=0, weights=sample_weight)
 
@@ -63,7 +64,8 @@ def mean_absolute_percentage_error(
     with np.errstate(divide='ignore', invalid='ignore'):
         ape = np.abs((y_true - y_pred) / y_true)
 
-    ape = np.nan_to_num(ape)
+    is_nan = np.isnan(ape)
+    ape[is_nan] = 0.0
     mape = np.average(ape, axis=0, weights=sample_weight)
 
     if multioutput == 'raw_values':
