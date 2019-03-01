@@ -14,6 +14,10 @@ class BaseRandomSeedAveraging(BaseEstimator, ABC):
     # TODO: add a n_jobs parameter
     # TODO: add a verbose parameter
 
+    @property
+    def _estimator_type(self):
+        return self.base_estimator._estimator_type
+
     @abstractmethod
     def __init__(
         self,
