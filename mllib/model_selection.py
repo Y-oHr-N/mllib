@@ -1,7 +1,9 @@
 import logging
 from time import perf_counter
+from typing import Any Callable, Dict #noqa
 
 import numpy as np
+import pandas as pd # noqa
 from sklearn.base import BaseEstimator, clone, is_classifier
 from sklearn.metrics import check_scoring
 from sklearn.model_selection import check_cv, cross_validate
@@ -195,14 +197,14 @@ class TPESearchCV(BaseEstimator):
     """
 
     # TODO: add a logic for pruning
-    # TODO: write type annotations
-
     @property
     def _estimator_type(self):
+        # () -> str
         return self.estimator._estimator_type
 
     @property
     def best_index_(self):
+        # () -> int
         """Index which corresponds to the best candidate parameter setting.
         """
 
@@ -214,6 +216,7 @@ class TPESearchCV(BaseEstimator):
 
     @property
     def best_params_(self):
+        # () -> Dict[str, Any]
         """Parameters of the best trial in the ``Study``.
         """
 
@@ -223,6 +226,7 @@ class TPESearchCV(BaseEstimator):
 
     @property
     def best_score_(self):
+        # () -> float
         """Mean cross-validated score of the best estimator.
         """
 
@@ -232,6 +236,7 @@ class TPESearchCV(BaseEstimator):
 
     @property
     def best_trial_(self):
+        # () -> optuna.structs.FrozenTrial
         """Best trial in the ``Study``.
         """
 
@@ -241,6 +246,7 @@ class TPESearchCV(BaseEstimator):
 
     @property
     def best_value_(self):
+        # () -> float
         """Best objective value in the ``Study``.
         """
 
@@ -250,6 +256,7 @@ class TPESearchCV(BaseEstimator):
 
     @property
     def classes_(self):
+        # () -> np.ndarray
         """Class labels.
         """
 
@@ -259,6 +266,7 @@ class TPESearchCV(BaseEstimator):
 
     @property
     def n_iter_(self):
+        # () -> int
         """Actual number of trials.
         """
 
@@ -268,6 +276,7 @@ class TPESearchCV(BaseEstimator):
 
     @property
     def scorer_(self):
+        # () -> Callable[..., float]
         """Scorer function.
         """
 
@@ -277,6 +286,7 @@ class TPESearchCV(BaseEstimator):
 
     @property
     def decision_function(self):
+        # (...) -> np.ndarray
         """Call decision_function on the estimator with the best found
         parameters.
         """
@@ -287,6 +297,7 @@ class TPESearchCV(BaseEstimator):
 
     @property
     def inverse_transform(self):
+        # (...) -> np.ndarray
         """Call inverse_transform on the estimator with the best found
         parameters.
         """
@@ -297,6 +308,7 @@ class TPESearchCV(BaseEstimator):
 
     @property
     def predict(self):
+        # (...) -> np.ndarray
         """Call predict on the estimator with the best found parameters.
         """
 
@@ -306,6 +318,7 @@ class TPESearchCV(BaseEstimator):
 
     @property
     def predict_log_proba(self):
+        # (...) -> np.ndarray
         """Call predict_log_proba on the estimator with the best found
         parameters.
         """
@@ -316,6 +329,7 @@ class TPESearchCV(BaseEstimator):
 
     @property
     def predict_proba(self):
+        # (...) -> np.ndarray
         """Call predict_proba on the estimator with the best found parameters.
         """
 
@@ -325,6 +339,7 @@ class TPESearchCV(BaseEstimator):
 
     @property
     def transform(self):
+        # (...) -> np.ndarray
         """Call transform on the estimator with the best found parameters.
         """
 
@@ -334,6 +349,7 @@ class TPESearchCV(BaseEstimator):
 
     @property
     def trials_dataframe(self):
+        # (...) -> pd.DataFrame
         """Call trials_dataframe on the ``Study``.
         """
 
@@ -359,6 +375,8 @@ class TPESearchCV(BaseEstimator):
         timeout=None,
         verbose=0
     ):
+        # (...) -> None
+
         if not optuna_is_installed:
             raise ImportError('optuna is not installed')
 
@@ -379,6 +397,8 @@ class TPESearchCV(BaseEstimator):
         self.verbose = verbose
 
     def _check_is_fitted(self):
+        # () -> None
+
         attributes = ['n_splits_', 'study_']
 
         if self.refit:
@@ -387,6 +407,8 @@ class TPESearchCV(BaseEstimator):
         check_is_fitted(self, attributes)
 
     def _check_params(self):
+        # () -> None
+
         if not is_estimator(self.estimator):
             raise ValueError(
                 f'estimator must be a scikit-learn estimator'
@@ -405,6 +427,8 @@ class TPESearchCV(BaseEstimator):
                 )
 
     def _refit(self, X, y=None, **fit_params):
+        # (np.ndarray, np.ndarray, Any) -> 'TPESearchCV'
+
         self.best_estimator_ = clone(self.estimator)
 
         self.best_estimator_.set_params(**self.study_.best_params)
@@ -418,6 +442,8 @@ class TPESearchCV(BaseEstimator):
         return self
 
     def _set_verbosity(self):
+        # () -> None
+
         if self.verbose > 1:
             optuna.logging.set_verbosity(logging.DEBUG)
         elif self.verbose > 0:
@@ -426,6 +452,7 @@ class TPESearchCV(BaseEstimator):
             optuna.logging.set_verbosity(logging.WARNING)
 
     def fit(self, X, y=None, groups=None, **fit_params):
+        # (np.ndarray, np.ndarray, np.ndarray, Any) -> 'TPESearchCV'
         """Run fit with all sets of parameters.
 
         Parameters
@@ -491,6 +518,7 @@ class TPESearchCV(BaseEstimator):
         return self
 
     def score(self, X, y=None):
+        # type: (np.ndarray, np.ndarray) -> float
         """Return the score on the given data.
 
         Parameters
