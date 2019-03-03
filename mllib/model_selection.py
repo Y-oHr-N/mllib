@@ -111,9 +111,7 @@ class Objective:
             trial.set_user_attr(f'mean_{name}', np.average(array))
             trial.set_user_attr(f'std_{name}', np.std(array))
 
-        user_attrs = trial.user_attrs
-
-        return - user_attrs['mean_test_score']
+        return - trial.user_attrs['mean_test_score']
 
 
 class TPESearchCV(BaseEstimator):
