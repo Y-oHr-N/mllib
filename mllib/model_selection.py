@@ -300,7 +300,7 @@ class TPESearchCV(BaseEstimator):
 
     @property
     def decision_function(self):
-        # (...) -> np.ndarray
+        # () -> Callable[..., np.ndarray]
         """Call decision_function on the estimator with the best found
         parameters.
         """
@@ -311,7 +311,7 @@ class TPESearchCV(BaseEstimator):
 
     @property
     def inverse_transform(self):
-        # (...) -> np.ndarray
+        # () -> Callable[..., np.ndarray]
         """Call inverse_transform on the estimator with the best found
         parameters.
         """
@@ -322,7 +322,7 @@ class TPESearchCV(BaseEstimator):
 
     @property
     def predict(self):
-        # (...) -> np.ndarray
+        # () -> Callable[..., np.ndarray]
         """Call predict on the estimator with the best found parameters.
         """
 
@@ -332,7 +332,7 @@ class TPESearchCV(BaseEstimator):
 
     @property
     def predict_log_proba(self):
-        # (...) -> np.ndarray
+        # () -> Callable[..., np.ndarray]
         """Call predict_log_proba on the estimator with the best found
         parameters.
         """
@@ -343,7 +343,7 @@ class TPESearchCV(BaseEstimator):
 
     @property
     def predict_proba(self):
-        # (...) -> np.ndarray
+        # () -> Callable[..., np.ndarray]
         """Call predict_proba on the estimator with the best found parameters.
         """
 
@@ -353,7 +353,7 @@ class TPESearchCV(BaseEstimator):
 
     @property
     def transform(self):
-        # (...) -> np.ndarray
+        # () -> Callable[..., np.ndarray]
         """Call transform on the estimator with the best found parameters.
         """
 
@@ -363,7 +363,7 @@ class TPESearchCV(BaseEstimator):
 
     @property
     def trials_dataframe(self):
-        # (...) -> pd.DataFrame
+        # () -> Callable[..., pd.DataFrame]
         """Call trials_dataframe on the ``Study``.
         """
 
