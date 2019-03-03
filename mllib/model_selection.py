@@ -402,7 +402,7 @@ class TPESearchCV(BaseEstimator):
         attributes = ['n_splits_', 'study_']
 
         if self.refit:
-            attributes += ['best_estimator_']
+            attributes += ['best_estimator_', 'refit_time_']
 
         check_is_fitted(self, attributes)
 
