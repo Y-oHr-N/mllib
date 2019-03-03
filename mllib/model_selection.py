@@ -179,9 +179,6 @@ class TPESearchCV(BaseEstimator):
     refit_time_
         Time for refitting the best estimator.
 
-    scorer_
-        Scorer function.
-
     study_
         Study corresponds to the optimization task.
 
@@ -271,6 +268,15 @@ class TPESearchCV(BaseEstimator):
         self._check_is_fitted()
 
         return len(self.study_.trials)
+
+    @property
+    def scorer_(self):
+        """Scorer function.
+        """
+
+        self._check_is_fitted()
+
+        return check_scoring(self.estimator, scoring=self.scoring)
 
     @property
     def decision_function(self):
@@ -376,7 +382,7 @@ class TPESearchCV(BaseEstimator):
         self.verbose = verbose
 
     def _check_is_fitted(self):
-        attributes = ['n_splits_', 'scorer_', 'study_']
+        attributes = ['n_splits_', 'study_']
 
         if self.refit:
             attributes += ['best_estimator_']
@@ -465,7 +471,6 @@ class TPESearchCV(BaseEstimator):
         )
 
         self.n_splits_ = cv.get_n_splits(X, y, groups=groups)
-        self.scorer_ = check_scoring(self.estimator, scoring=self.scoring)
         self.study_ = create_study(
             load_if_exists=self.load_if_exists,
             sampler=sampler,
@@ -501,7 +506,5 @@ class TPESearchCV(BaseEstimator):
         score
             Scaler score.
         """
-
-        self._check_is_fitted()
 
         return self.scorer_(self.best_estimator_, X, y)
