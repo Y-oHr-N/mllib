@@ -70,6 +70,8 @@ class Objective:
         return_train_score=False,
         scoring=None
     ):
+        # (...) -> None
+
         self.X = X
         self.y = y
         self.cv = cv
@@ -82,11 +84,15 @@ class Objective:
         self.scoring = scoring
 
     def _cross_validate_with_pruning(self, estimator, trial):
+        # (BaseEstimator, optuna.trial.Trial) -> Dict[str, np.ndarray]
+
         raise NotImplementedError(
             f'_cross_validate_with_pruning has not been implemented yet'
         )
 
     def __call__(self, trial):
+        # (optuna.trial.Trial) -> float
+
         estimator = clone(self.estimator)
         params = {
             name: trial._suggest(
