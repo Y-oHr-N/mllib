@@ -81,6 +81,11 @@ class Objective:
         self.return_train_score = return_train_score
         self.scoring = scoring
 
+    def _cross_validate_with_pruning(self, estimator, trial):
+        raise NotImplementedError(
+            f'_cross_validate_with_pruning has not been implemented yet'
+        )
+
     def __call__(self, trial):
         estimator = clone(self.estimator)
         params = {
@@ -91,17 +96,20 @@ class Objective:
 
         estimator.set_params(**params)
 
-        cv_results = cross_validate(
-            estimator,
-            self.X,
-            self.y,
-            cv=self.cv,
-            error_score=self.error_score,
-            fit_params=self.fit_params,
-            groups=self.groups,
-            return_train_score=self.return_train_score,
-            scoring=self.scoring
-        )
+        if hasattr(estimator, 'partial_fit'):
+            cv_results = self._cross_validate_with_pruning(estimator, trial)
+        else:
+            cv_results = cross_validate(
+                estimator,
+                self.X,
+                self.y,
+                cv=self.cv,
+                error_score=self.error_score,
+                fit_params=self.fit_params,
+                groups=self.groups,
+                return_train_score=self.return_train_score,
+                scoring=self.scoring
+            )
 
         for name, array in cv_results.items():
             if name in ['test_score', 'train_score']:
@@ -146,6 +154,9 @@ class TPESearchCV(BaseEstimator):
 
     return_train_score
         If True, training scores will be included.
+
+    pruner
+        Pruner that decides early stopping of unpromising trials.
 
     refit
         If True, refit the estimator with the best found parameters.
@@ -194,7 +205,6 @@ class TPESearchCV(BaseEstimator):
     >>> y_pred = tpe_search.predict(X)
     """
 
-    # TODO: add a logic for pruning
     @property
     def _estimator_type(self):
         # () -> str
@@ -364,6 +374,7 @@ class TPESearchCV(BaseEstimator):
         load_if_exists=False,
         n_iter=10,
         n_jobs=1,
+        pruner=None,
         random_state=None,
         refit=True,
         return_train_score=False,
@@ -385,6 +396,7 @@ class TPESearchCV(BaseEstimator):
         self.n_iter = n_iter
         self.n_jobs = n_jobs
         self.param_distributions = param_distributions
+        self.pruner = pruner
         self.random_state = random_state
         self.refit = refit
         self.return_train_score = return_train_score
@@ -498,6 +510,7 @@ class TPESearchCV(BaseEstimator):
         self.n_splits_ = cv.get_n_splits(X, y, groups=groups)
         self.study_ = optuna.create_study(
             load_if_exists=self.load_if_exists,
+            pruner=self.pruner,
             sampler=sampler,
             storage=self.storage,
             study_name=self.study_name
