@@ -489,7 +489,7 @@ class TPESearchCV(BaseEstimator):
             self.param_distributions,
             X,
             y,
-            cv=cv,
+            cv=self.cv,
             error_score=self.error_score,
             fit_params=fit_params,
             groups=groups,
