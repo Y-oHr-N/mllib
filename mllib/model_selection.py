@@ -13,10 +13,7 @@ from .utils import is_estimator
 optuna_is_installed = True
 
 try:
-    from optuna import create_study
-    from optuna.distributions import BaseDistribution
-    from optuna.logging import set_verbosity
-    from optuna.samplers import TPESampler
+    import optuna
 except ImportError:
     optuna_is_installed = False
 
@@ -399,7 +396,10 @@ class TPESearchCV(BaseEstimator):
             raise ValueError(f'param_distributions must be a dictionary')
 
         for name, distribution in self.param_distributions.items():
-            if not isinstance(distribution, BaseDistribution):
+            if not isinstance(
+                distribution,
+                optuna.distributions.BaseDistribution
+            ):
                 raise ValueError(
                     f'value of {name} must be a optuna distribution'
                 )
@@ -419,11 +419,11 @@ class TPESearchCV(BaseEstimator):
 
     def _set_verbosity(self):
         if self.verbose > 1:
-            set_verbosity(logging.DEBUG)
+            optuna.logging.set_verbosity(logging.DEBUG)
         elif self.verbose > 0:
-            set_verbosity(logging.INFO)
+            optuna.logging.set_verbosity(logging.INFO)
         else:
-            set_verbosity(logging.WARNING)
+            optuna.logging.set_verbosity(logging.WARNING)
 
     def fit(self, X, y=None, groups=None, **fit_params):
         """Run fit with all sets of parameters.
@@ -456,7 +456,7 @@ class TPESearchCV(BaseEstimator):
         cv = check_cv(self.cv, y, classifier)
         random_state = check_random_state(self.random_state)
         seed = random_state.randint(0, np.iinfo(np.int32).max)
-        sampler = TPESampler(seed=seed)
+        sampler = optuna.samplers.TPESampler(seed=seed)
         objective = Objective(
             self.estimator,
             self.param_distributions,
@@ -471,7 +471,7 @@ class TPESearchCV(BaseEstimator):
         )
 
         self.n_splits_ = cv.get_n_splits(X, y, groups=groups)
-        self.study_ = create_study(
+        self.study_ = optuna.create_study(
             load_if_exists=self.load_if_exists,
             sampler=sampler,
             storage=self.storage,
