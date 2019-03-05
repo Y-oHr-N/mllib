@@ -223,6 +223,15 @@ class TPESearchCV(BaseEstimator):
         return self.estimator._estimator_type
 
     @property
+    def _sampler(self):
+        # type: () -> optuna.samplers.TPESampler
+
+        random_state = check_random_state(self.random_state)
+        seed = random_state.randint(0, np.iinfo(np.int32).max)
+
+        return optuna.samplers.TPESampler(seed=seed)
+
+    @property
     def best_index_(self):
         # type: () -> int
         """Index which corresponds to the best candidate parameter setting.
@@ -503,9 +512,6 @@ class TPESearchCV(BaseEstimator):
 
         classifier = is_classifier(self.estimator)
         cv = check_cv(self.cv, y, classifier)
-        random_state = check_random_state(self.random_state)
-        seed = random_state.randint(0, np.iinfo(np.int32).max)
-        sampler = optuna.samplers.TPESampler(seed=seed)
         objective = Objective(
             self.estimator,
             self.param_distributions,
@@ -523,7 +529,7 @@ class TPESearchCV(BaseEstimator):
         self.study_ = optuna.create_study(
             load_if_exists=self.load_if_exists,
             pruner=self.pruner,
-            sampler=sampler,
+            sampler=self._sampler,
             storage=self.storage,
             study_name=self.study_name
         )
