@@ -83,8 +83,8 @@ class Objective:
         self.return_train_score = return_train_score
         self.scoring = scoring
 
-    def _cross_validate_with_pruning(self, estimator, trial):
-        # (BaseEstimator, optuna.trial.Trial) -> Dict[str, np.ndarray]
+    def _cross_validate_with_pruning(self, trial, estimator):
+        # type: (optuna.trial.Trial, BaseEstimator) -> Dict[str, np.ndarray]
 
         raise NotImplementedError(
             f'_cross_validate_with_pruning has not been implemented yet'
@@ -103,7 +103,7 @@ class Objective:
         estimator.set_params(**params)
 
         if hasattr(estimator, 'partial_fit'):
-            cv_results = self._cross_validate_with_pruning(estimator, trial)
+            cv_results = self._cross_validate_with_pruning(trial, estimator)
         else:
             cv_results = cross_validate(
                 estimator,
