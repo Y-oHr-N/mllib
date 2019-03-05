@@ -70,7 +70,7 @@ class Objective:
         return_train_score=False,
         scoring=None
     ):
-        # (...) -> None
+        # type: (...) -> None
 
         self.X = X
         self.y = y
