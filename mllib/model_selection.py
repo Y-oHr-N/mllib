@@ -1,6 +1,6 @@
 import logging
 from time import perf_counter
-from typing import Any Callable, Dict # noqa
+from typing import Any, Callable, Dict # noqa
 
 import numpy as np
 import pandas as pd # noqa
