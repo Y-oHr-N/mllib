@@ -90,15 +90,20 @@ class Objective:
             f'_cross_validate_with_pruning has not been implemented yet'
         )
 
-    def __call__(self, trial):
-        # (optuna.trial.Trial) -> float
+    def _get_params(self, trial):
+        # type: (optuna.trial.Trial) -> Dict[str, Any]
 
-        estimator = clone(self.estimator)
-        params = {
+        return {
             name: trial._suggest(
                 name, distribution
             ) for name, distribution in self.param_distributions.items()
         }
+
+    def __call__(self, trial):
+        # type: (optuna.trial.Trial) -> float
+
+        estimator = clone(self.estimator)
+        params = self._get_params(trial)
 
         estimator.set_params(**params)
 
