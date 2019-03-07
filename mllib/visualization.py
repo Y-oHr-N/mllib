@@ -1,12 +1,18 @@
 import numpy as np
 from sklearn.model_selection._validation import _translate_train_sizes
 from sklearn.utils import check_X_y
-from yellowbrick import reset_orig
-from yellowbrick.base import ModelVisualizer
 
 from .utils import compute_execution_time
 
-reset_orig()
+try:
+    from yellowbrick import reset_orig
+    from yellowbrick.base import ModelVisualizer
+
+    reset_orig()
+
+except ImportError:
+    ModelVisualizer = object
+    yellowbrick_is_installed = False
 
 DEFAULT_TRAIN_SIZES = np.linspace(0.1, 1.0, 5)
 
@@ -20,6 +26,9 @@ class TrainingTimeCurve(ModelVisualizer):
         title='Training time curve',
         train_sizes=DEFAULT_TRAIN_SIZES
     ):
+        if not yellowbrick_is_installed:
+            raise ImportError('yellowbrick is not installed')
+
         super().__init__(estimator, ax=ax, title=title)
 
         self.n_trials = n_trials
