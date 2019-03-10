@@ -82,6 +82,9 @@ def get_param_distributions(estimator_name, prefix=None):
         raise ImportError('optuna is not installed')
 
     dict_of_param_distributions = {
+        'KBinsDiscretizer': {
+            'n_bins': IntUniformDistribution(2, 10)
+        },
         'GradientBoostingClassifier': {
             'learning_rate': LogUniformDistribution(0.001, 1.0),
             'loss': CategoricalDistribution(['deviance', 'exponential']),

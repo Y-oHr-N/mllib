@@ -5,8 +5,8 @@ from sklearn.impute import MissingIndicator, SimpleImputer
 from sklearn.pipeline import make_pipeline, make_union
 from sklearn.preprocessing import (
     FunctionTransformer,
-    OneHotEncoder,
-    StandardScaler
+    KBinsDiscretizer,
+    OneHotEncoder
 )
 
 
@@ -30,20 +30,24 @@ def affine(X, A=1.0, b=0.0, inverse=False):
 def make_mixed_transformer(categorical_feature_names, numerical_feature_names):
     categorical_transformer = make_pipeline(
         SimpleImputer(fill_value='missing', strategy='constant'),
-        OneHotEncoder(handle_unknown='ignore')
+        OneHotEncoder()
     )
 
     numerical_transformer = make_union(
-        make_pipeline(SimpleImputer(), StandardScaler()),
+        make_pipeline(
+            SimpleImputer(),
+            KBinsDiscretizer()
+        ),
         MissingIndicator(sparse=True)
     )
 
-    mixed_transformer = make_column_transformer(
-        (categorical_transformer, categorical_feature_names),
-        (numerical_transformer, numerical_feature_names)
+    return make_pipeline(
+        make_column_transformer(
+            (categorical_transformer, categorical_feature_names),
+            (numerical_transformer, numerical_feature_names)
+        ),
+        VarianceThreshold()
     )
-
-    return make_pipeline(mixed_transformer, VarianceThreshold())
 
 
 class Affine(FunctionTransformer):
