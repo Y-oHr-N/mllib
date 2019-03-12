@@ -1,7 +1,6 @@
 from time import perf_counter
 
 import numpy as np
-from sklearn.base import BaseEstimator
 
 optuna_is_installed = True
 lgb_is_installed = True
@@ -178,7 +177,7 @@ def get_param_distributions(estimator_name, prefix=None):
 
 
 def is_estimator(estimator):
-    return isinstance(estimator, BaseEstimator)
+    return hasattr(estimator, 'fit')
 
 
 def is_lgbm_model(estimator):
