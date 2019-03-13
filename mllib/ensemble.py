@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 from scipy import stats
 from sklearn.base import (
+    BaseEstimator,
     ClassifierMixin,
     MetaEstimatorMixin,
     RegressorMixin,
@@ -147,18 +148,10 @@ class RandomSeedAveragingClassifier(BaseRandomSeedAveraging, ClassifierMixin):
         return np.ravel(mode)
 
 
-class SplittedEstimator(MetaEstimatorMixin):
+class SplittedEstimator(BaseEstimator, MetaEstimatorMixin):
     @property
     def _estimator_type(self):
         return self.base_estimator._estimator_type
-
-    @property
-    def get_params(self):
-        return self.base_estimator.get_params
-
-    @property
-    def set_params(self):
-        return self.base_estimator.set_params
 
     def __init__(self, base_estimator):
         self.base_estimator = base_estimator
