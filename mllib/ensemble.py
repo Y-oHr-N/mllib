@@ -211,7 +211,7 @@ class SplittedEstimator(BaseEstimator, MetaEstimatorMixin, ABC):
             is_test = groups == i
 
             if np.sum(is_test) > 0:
-                y_predd[is_test] = e.predict(X[is_test])
+                y_pred[is_test] = e.predict(X[is_test])
 
         return y_pred
 
