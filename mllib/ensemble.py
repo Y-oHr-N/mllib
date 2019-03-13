@@ -157,22 +157,20 @@ class RandomSeedAveragingRegressor(BaseRandomSeedAveraging, RegressorMixin):
 
         return np.average(predictions, axis=1)
 
-class SplittedEstimator(BaseEstimator, MetaEstimatorMixin):
-    @property
-    def _estimator_type(self):
-        return self.base_estimator._estimator_type
 
+class SplittedEstimator(BaseEstimator, MetaEstimatorMixin, ABC):
     @property
     def named_estimators_(self):
         self._check_is_fitted()
 
         return dict(zip(self.unique_groups_, self.estimators_))
 
+    @abstractmethod
     def __init__(self, base_estimator):
         self.base_estimator = base_estimator
 
     def _check_is_fitted(self):
-        check_is_fitted(self, ['estimators_', 'unique_groups_'])
+        check_is_fitted(self, ['by_', 'estimators_', 'unique_groups_'])
 
     def _check_params(self):
         if not is_estimator(self.base_estimator):
@@ -180,18 +178,22 @@ class SplittedEstimator(BaseEstimator, MetaEstimatorMixin):
                 f'base_estimator must be a scikit-learn estimator'
             )
 
-    def fit(self, X, y, by, **fit_params):
-        X, y = check_X_y(X, y, estimator=self, force_all_finite='allow-nan')
-        by = column_or_1d(by)
+    def fit(self, X, y=None, by=None, **fit_params):
+        if y is None:
+            raise NotImplementedError(f'')
 
-        check_consistent_length(X, by)
+        if by is None:
+            raise NotImplementedError(f'')
 
-        self.unique_groups_ = np.unique(by)
+        groups = X.pop(by)
+
+        self.by_ = by
+        self.unique_groups_ = np.unique(groups)
         self.estimators_ = []
 
         for i in self.unique_groups_:
             e = clone(self.base_estimator)
-            is_train = by == i
+            is_train = groups == i
 
             e.fit(X[is_train], y[is_train], **fit_params)
 
@@ -199,20 +201,38 @@ class SplittedEstimator(BaseEstimator, MetaEstimatorMixin):
 
         return self
 
-    def predict(self, X, by):
+    def predict(self, X):
         self._check_is_fitted()
 
-        X = check_array(X, estimator=self, force_all_finite='allow-nan')
-        by = column_or_1d(by)
+        groups = X.pop(self.by_)
+        y_pred = np.full_like(groups, np.nan)
 
-        check_consistent_length(X, by)
-
-        y_pred = np.full_like(by, np.nan)
-
-        for i, e in zip(self.unique_groups_, self.estimators_):
-            is_test = by == i
+        for i, e in self.named_estimators_.items():
+            is_test = groups == i
 
             if np.sum(is_test) > 0:
-                y_pred[is_test] = e.predict(X[is_test])
+                y_predd[is_test] = e.predict(X[is_test])
 
         return y_pred
+
+
+class SplittedClassifier(SplittedEstimator, ClassifierMixin):
+    def __init__(self, base_estimator):
+        super().__init__(base_estimator=base_estimator)
+
+    def _check_params(self):
+        super()._check_params()
+
+        if not is_classifier(self.base_estimator):
+            raise ValueError(f'base_estimator must be a classifier')
+
+
+class SplittedRegressor(SplittedEstimator, RegressorMixin):
+    def __init__(self, base_estimator):
+        super().__init__(base_estimator=base_estimator)
+
+    def _check_params(self):
+        super()._check_params()
+
+        if not is_regressor(self.base_estimator):
+            raise ValueError(f'base_estimator must be a regressor')
