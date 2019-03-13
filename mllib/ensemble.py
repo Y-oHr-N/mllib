@@ -13,13 +13,7 @@ from sklearn.base import (
     is_regressor
 )
 from sklearn.ensemble import BaseEnsemble
-from sklearn.utils import (
-    check_X_y,
-    check_array,
-    check_consistent_length,
-    check_random_state,
-    column_or_1d
-)
+from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
 
 from .utils import is_estimator
