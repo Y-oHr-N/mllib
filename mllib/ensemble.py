@@ -160,11 +160,12 @@ class SplittedEstimator(BaseEstimator, MetaEstimatorMixin, ABC):
         return dict(zip(self.unique_groups_, self.estimators_))
 
     @abstractmethod
-    def __init__(self, base_estimator):
+    def __init__(self, base_estimator, by):
         self.base_estimator = base_estimator
+        self.by = by
 
     def _check_is_fitted(self):
-        check_is_fitted(self, ['by_', 'estimators_', 'unique_groups_'])
+        check_is_fitted(self, ['estimators_', 'unique_groups_'])
 
     def _check_params(self):
         if not is_estimator(self.base_estimator):
@@ -172,16 +173,12 @@ class SplittedEstimator(BaseEstimator, MetaEstimatorMixin, ABC):
                 f'base_estimator must be a scikit-learn estimator'
             )
 
-    def fit(self, X, y=None, by=None, **fit_params):
+    def fit(self, X, y=None, **fit_params):
         if y is None:
             raise NotImplementedError(f'')
 
-        if by is None:
-            raise NotImplementedError(f'')
+        groups = X.pop(self.by)
 
-        groups = X.pop(by)
-
-        self.by_ = by
         self.unique_groups_ = np.unique(groups)
         self.estimators_ = []
 
@@ -198,7 +195,7 @@ class SplittedEstimator(BaseEstimator, MetaEstimatorMixin, ABC):
     def predict(self, X):
         self._check_is_fitted()
 
-        groups = X.pop(self.by_)
+        groups = X.pop(self.by)
         y_pred = np.full_like(groups, np.nan)
 
         for i, e in self.named_estimators_.items():
