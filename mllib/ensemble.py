@@ -19,7 +19,7 @@ from sklearn.utils.validation import check_is_fitted
 from .utils import is_estimator
 
 
-class BaseRandomSeedAveraging(BaseEnsemble, ABC):
+class BaseRandomSeedAveraging(BaseEnsemble):
     # TODO: add a n_jobs parameter
     # TODO: add a verbose parameter
 
