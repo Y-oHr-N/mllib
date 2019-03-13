@@ -3,7 +3,8 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 from scipy import stats
-from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin, clone
+from sklearn.base import ClassifierMixin, RegressorMixin, clone
+from sklearn.ensemble import BaseEnsemble
 from sklearn.utils import (
     check_X_y,
     check_array,
@@ -16,13 +17,17 @@ from sklearn.utils.validation import check_is_fitted
 from .utils import is_estimator
 
 
-class BaseRandomSeedAveraging(BaseEstimator, ABC):
+class BaseRandomSeedAveraging(BaseEnsemble, ABC):
     # TODO: add a n_jobs parameter
     # TODO: add a verbose parameter
 
     @property
     def _estimator_type(self):
         return self.base_estimator._estimator_type
+
+    @property
+    def _check_params(self):
+        return self._validate_estimator
 
     @abstractmethod
     def __init__(
@@ -31,28 +36,15 @@ class BaseRandomSeedAveraging(BaseEstimator, ABC):
         n_estimators=10,
         random_state=None
     ):
-        self.base_estimator = base_estimator
-        self.n_estimators = n_estimators
+        super().__init__(
+            base_estimator=base_estimator,
+            n_estimators=n_estimators
+        )
+
         self.random_state = random_state
 
     def _check_is_fitted(self):
         check_is_fitted(self, 'estimators_')
-
-    def _check_params(self):
-        if not is_estimator(self.base_estimator):
-            raise ValueError(
-                f'base_estimator must be a scikit-learn estimator'
-            )
-
-        if not hasattr(self.base_estimator, 'random_state'):
-            raise ValueError(
-                f'base_estimator must have random_state'
-            )
-
-        if self.n_estimators <= 0:
-            raise ValueError(
-                f'n_estimators must be > 0, got {self.n_estimators}'
-            )
 
     def fit(self, X, y, **fit_params):
         self._check_params()
@@ -62,13 +54,9 @@ class BaseRandomSeedAveraging(BaseEstimator, ABC):
         self.estimators_ = []
 
         for _ in range(self.n_estimators):
-            e = clone(self.base_estimator)
-            seed = random_state.randint(0, np.iinfo(np.int32).max)
+            e = self._make_estimator(random_state=random_state)
 
-            e.set_params(random_state=seed)
             e.fit(X, y, **fit_params)
-
-            self.estimators_.append(e)
 
         return self
 
