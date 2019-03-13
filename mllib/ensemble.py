@@ -213,26 +213,3 @@ class SplittedEstimator(MetaEstimatorMixin):
                 y_pred[is_test] = e.predict(X[is_test])
 
         return y_pred
-
-    def score(self, X, y, by):
-        self._check_is_fitted()
-
-        X, y = check_X_y(X, y, estimator=self)
-        by = column_or_1d(by)
-
-        check_consistent_length(X, by)
-
-        is_in = np.isin(by, self.unique_groups_)
-
-        if np.any(~is_in):
-            raise ValueError(f'unknown group labels are included')
-
-        y_score = np.empty_like(by)
-
-        for i, e in zip(self.unique_groups_, self.estimators_):
-            is_test = by == i
-
-            if np.sum(is_test) > 0:
-                y_score[is_test] = e.score(X[is_test])
-
-        return y_score
