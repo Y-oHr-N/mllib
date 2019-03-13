@@ -4,7 +4,12 @@ from typing import Any, Callable, Dict # noqa
 
 import numpy as np
 import pandas as pd # noqa
-from sklearn.base import BaseEstimator, clone, is_classifier
+from sklearn.base import (
+    BaseEstimator,
+    MetaEstimatorMixin,
+    clone,
+    is_classifier
+)
 from sklearn.metrics import check_scoring
 from sklearn.model_selection import check_cv, cross_validate
 from sklearn.utils import check_random_state
@@ -133,7 +138,7 @@ class Objective:
         return - trial.user_attrs['mean_test_score']
 
 
-class TPESearchCV(BaseEstimator):
+class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
     """Hyper parameter search with cross-validation.
 
     Parameters
