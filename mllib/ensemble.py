@@ -153,6 +153,12 @@ class SplittedEstimator(BaseEstimator, MetaEstimatorMixin):
     def _estimator_type(self):
         return self.base_estimator._estimator_type
 
+    @property
+    def named_estimators_(self):
+        self._check_is_fitted()
+
+        return dict(zip(self.unique_groups_, self.estimators_))
+
     def __init__(self, base_estimator):
         self.base_estimator = base_estimator
 
