@@ -172,13 +172,13 @@ class SplittedEstimator(BaseEstimator, MetaEstimatorMixin):
             )
 
     def fit(self, X, y, by, **fit_params):
-        X, y = check_X_y(X, y, estimator=self)
+        X, y = check_X_y(X, y, estimator=self, force_all_finite='allow-nan')
         by = column_or_1d(by)
 
         check_consistent_length(X, by)
 
-        self.estimators_ = []
         self.unique_groups_ = np.unique(by)
+        self.estimators_ = []
 
         for i in self.unique_groups_:
             e = clone(self.base_estimator)
@@ -193,17 +193,12 @@ class SplittedEstimator(BaseEstimator, MetaEstimatorMixin):
     def predict(self, X, by):
         self._check_is_fitted()
 
-        X = check_array(X, estimator=self)
+        X = check_array(X, estimator=self, force_all_finite='allow-nan')
         by = column_or_1d(by)
 
         check_consistent_length(X, by)
 
-        is_in = np.isin(by, self.unique_groups_)
-
-        if np.any(~is_in):
-            raise ValueError(f'unknown group labels are included')
-
-        y_pred = np.empty_like(by)
+        y_pred = np.full_like(by, np.nan)
 
         for i, e in zip(self.unique_groups_, self.estimators_):
             is_test = by == i
