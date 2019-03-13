@@ -8,7 +8,9 @@ from sklearn.base import (
     ClassifierMixin,
     MetaEstimatorMixin,
     RegressorMixin,
-    clone
+    clone,
+    is_classifier,
+    is_regressor
 )
 from sklearn.ensemble import BaseEnsemble
 from sklearn.utils import (
@@ -26,10 +28,6 @@ from .utils import is_estimator
 class BaseRandomSeedAveraging(BaseEnsemble, ABC):
     # TODO: add a n_jobs parameter
     # TODO: add a verbose parameter
-
-    @property
-    def _estimator_type(self):
-        return self.base_estimator._estimator_type
 
     @property
     def _check_params(self):
@@ -52,7 +50,7 @@ class BaseRandomSeedAveraging(BaseEnsemble, ABC):
     def _check_is_fitted(self):
         check_is_fitted(self, 'estimators_')
 
-    def fit(self, X, y, **fit_params):
+    def fit(self, X, y=None, **fit_params):
         self._check_params()
 
         random_state = check_random_state(self.random_state)
@@ -69,42 +67,6 @@ class BaseRandomSeedAveraging(BaseEnsemble, ABC):
     @abstractmethod
     def predict(self, X):
         pass
-
-
-class RandomSeedAveragingRegressor(BaseRandomSeedAveraging, RegressorMixin):
-    """Random seed averaging regressor.
-
-    examples
-    --------
-    >>> from mllib.ensemble import RandomSeedAveragingRegressor
-    >>> from sklearn.datasets import load_boston
-    >>> from sklearn.ensemble import RandomForestRegressor
-    >>> est = RandomForestRegressor(n_estimators=10)
-    >>> reg = RandomSeedAveragingRegressor(est)
-    >>> X, y = load_boston(return_X_y=True)
-    >>> reg.fit(X, y) # doctest: +ELLIPSIS
-    RandomSeedAveragingRegressor(...)
-    >>> y_pred = reg.predict(X)
-    """
-
-    def __init__(
-        self,
-        base_estimator,
-        n_estimators=10,
-        random_state=None
-    ):
-        super().__init__(
-            base_estimator=base_estimator,
-            n_estimators=n_estimators,
-            random_state=random_state
-        )
-
-    def predict(self, X):
-        self._check_is_fitted()
-
-        predictions = np.asarray([e.predict(X) for e in self.estimators_]).T
-
-        return np.average(predictions, axis=1)
 
 
 class RandomSeedAveragingClassifier(BaseRandomSeedAveraging, ClassifierMixin):
@@ -135,6 +97,12 @@ class RandomSeedAveragingClassifier(BaseRandomSeedAveraging, ClassifierMixin):
             random_state=random_state
         )
 
+    def _check_params(self):
+        super()._check_params()
+
+        if not is_classifier(self.base_estimator):
+            raise ValueError(f'base_estimator must be a classifier')
+
     def predict(self, X):
         self._check_is_fitted()
 
@@ -147,6 +115,47 @@ class RandomSeedAveragingClassifier(BaseRandomSeedAveraging, ClassifierMixin):
 
         return np.ravel(mode)
 
+
+class RandomSeedAveragingRegressor(BaseRandomSeedAveraging, RegressorMixin):
+    """Random seed averaging regressor.
+
+    examples
+    --------
+    >>> from mllib.ensemble import RandomSeedAveragingRegressor
+    >>> from sklearn.datasets import load_boston
+    >>> from sklearn.ensemble import RandomForestRegressor
+    >>> est = RandomForestRegressor(n_estimators=10)
+    >>> reg = RandomSeedAveragingRegressor(est)
+    >>> X, y = load_boston(return_X_y=True)
+    >>> reg.fit(X, y) # doctest: +ELLIPSIS
+    RandomSeedAveragingRegressor(...)
+    >>> y_pred = reg.predict(X)
+    """
+
+    def __init__(
+        self,
+        base_estimator,
+        n_estimators=10,
+        random_state=None
+    ):
+        super().__init__(
+            base_estimator=base_estimator,
+            n_estimators=n_estimators,
+            random_state=random_state
+        )
+
+    def _check_params(self):
+        super()._check_params()
+
+        if not is_regressor(self.base_estimator):
+            raise ValueError(f'base_estimator must be a regressor')
+
+    def predict(self, X):
+        self._check_is_fitted()
+
+        predictions = np.asarray([e.predict(X) for e in self.estimators_]).T
+
+        return np.average(predictions, axis=1)
 
 class SplittedEstimator(BaseEstimator, MetaEstimatorMixin):
     @property
