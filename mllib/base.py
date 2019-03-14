@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 from sklearn.base import BaseEstimator as SKLearnBaseEstimator
+from sklearn.externals.joblib import dump
 
 lgb_is_installed = True
 xgb_is_installed = True
@@ -54,5 +55,26 @@ class BaseEstimator(SKLearnBaseEstimator, ABC):
         pass
 
     @abstractmethod
-    def fit(self, X, y=None):
+    def fit(self, X, y=None, **fit_params):
         pass
+
+    def to_pickle(self, filename, **kwargs):
+        """Persist an estimator object.
+
+        Parameters
+        ----------
+        filename : str or pathlib.Path
+            Path of the file in which it is to be stored.
+
+        kwargs : dict
+            Other keywords passed to ``sklearn.externals.joblib.dump``.
+
+        Returns
+        -------
+        filenames : list
+            List of file names in which the data is stored.
+        """
+
+        self._check_is_fitted()
+
+        return dump(self, filename, **kwargs)
