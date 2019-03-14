@@ -128,3 +128,12 @@ def root_mean_squared_log_error(
         multioutput = None
 
     return np.average(rmsle, weights=multioutput)
+
+
+# alias functions
+maape = mean_arctangent_absolute_percentage_error
+mape = mean_absolute_percentage_error
+mse = mean_squared_error
+msle = mean_squared_log_error
+rmse = root_mean_squared_error
+rmsle = root_mean_squared_log_error
