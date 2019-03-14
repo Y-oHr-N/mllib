@@ -15,7 +15,8 @@ from sklearn.utils import (
     check_X_y,
     check_array,
     check_random_state,
-    gen_batches
+    gen_batches,
+    safe_indexing
 )
 from sklearn.utils.validation import check_is_fitted
 from tqdm import tqdm, trange
@@ -157,14 +158,14 @@ def bsgd(
 
             random_state.shuffle(indices)
 
-            X = X[indices]
-            y = y[indices]
-            sample_weight = sample_weight[indices]
+            X = safe_indexing(X, indices)
+            y = safe_indexing(y, indices)
+            sample_weight = safe_indexing(sample_weight, indices)
 
         for batch in batches:
-            X_batch = X[batch]
-            y_batch = y[batch]
-            sample_weight_batch = sample_weight[batch]
+            X_batch = safe_indexing(X, batch)
+            y_batch = safe_indexing(y, batch)
+            sample_weight_batch = safe_indexing(sample_weight, batch)
             y_score = _decision_function(
                 X_batch,
                 support_vectors,
