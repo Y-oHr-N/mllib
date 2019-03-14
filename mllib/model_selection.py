@@ -4,18 +4,13 @@ from typing import Any, Callable, Dict # noqa
 
 import numpy as np
 import pandas as pd # noqa
-from sklearn.base import (
-    BaseEstimator,
-    MetaEstimatorMixin,
-    clone,
-    is_classifier
-)
+from sklearn.base import MetaEstimatorMixin, clone, is_classifier
 from sklearn.metrics import check_scoring
 from sklearn.model_selection import check_cv, cross_validate
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
 
-from .utils import is_estimator
+from .base import BaseEstimator, is_estimator
 
 optuna_is_installed = True
 

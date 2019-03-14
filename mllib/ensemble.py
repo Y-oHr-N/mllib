@@ -1,10 +1,9 @@
 import warnings
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 import numpy as np
 from scipy import stats
 from sklearn.base import (
-    BaseEstimator,
     ClassifierMixin,
     MetaEstimatorMixin,
     RegressorMixin,
@@ -16,7 +15,7 @@ from sklearn.ensemble import BaseEnsemble
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
 
-from .utils import is_estimator
+from .base import BaseEstimator, is_estimator
 
 
 class BaseRandomSeedAveraging(BaseEnsemble):
@@ -152,7 +151,7 @@ class RandomSeedAveragingRegressor(BaseRandomSeedAveraging, RegressorMixin):
         return np.average(predictions, axis=1)
 
 
-class SplittedEstimator(BaseEstimator, MetaEstimatorMixin, ABC):
+class BaseSplitted(BaseEstimator, MetaEstimatorMixin):
     @property
     def named_estimators_(self):
         self._check_is_fitted()
@@ -207,7 +206,7 @@ class SplittedEstimator(BaseEstimator, MetaEstimatorMixin, ABC):
         return y_pred
 
 
-class SplittedClassifier(SplittedEstimator, ClassifierMixin):
+class SplittedClassifier(BaseSplitted, ClassifierMixin):
     def __init__(self, base_estimator):
         super().__init__(base_estimator=base_estimator)
 
@@ -218,7 +217,7 @@ class SplittedClassifier(SplittedEstimator, ClassifierMixin):
             raise ValueError(f'base_estimator must be a classifier')
 
 
-class SplittedRegressor(SplittedEstimator, RegressorMixin):
+class SplittedRegressor(BaseSplitted, RegressorMixin):
     def __init__(self, base_estimator):
         super().__init__(base_estimator=base_estimator)
 

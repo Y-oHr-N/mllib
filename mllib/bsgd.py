@@ -1,9 +1,9 @@
 import sys
-from abc import abstractmethod, ABC
+from abc import abstractmethod
 from typing import Tuple, Union
 
 import numpy as np
-from sklearn.base import BaseEstimator, RegressorMixin
+from sklearn.base import RegressorMixin
 from sklearn.linear_model.sgd_fast import (
     EpsilonInsensitive,
     Huber,
@@ -20,6 +20,7 @@ from sklearn.utils import (
 from sklearn.utils.validation import check_is_fitted
 from tqdm import tqdm, trange
 
+from .base import BaseEstimator
 from .utils import check_sample_weight
 
 LOSS_CLASSES = {
@@ -286,7 +287,7 @@ def _decision_function(
     return K @ dual_coef + intercept
 
 
-class BaseSGD(BaseEstimator, ABC):
+class BaseSGD(BaseEstimator):
     # TODO: add a BNormaClassifier class
     # TODO: add a BNormaRegressor class
     # TODO: add a BPegasosClassifier class
