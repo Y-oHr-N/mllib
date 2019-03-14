@@ -2,6 +2,7 @@ import logging
 
 from . import base # noqa
 from . import bsgd # noqa
+from . import compose # noqa
 from . import ensemble # noqa
 from . import metrics # noqa
 from . import model_selection # noqa
