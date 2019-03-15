@@ -1,8 +1,7 @@
 import numpy as np
 from sklearn.model_selection._validation import _translate_train_sizes
-from sklearn.utils import check_X_y
 
-from .utils import compute_execution_time
+from .utils import compute_execution_time, safe_indexing
 
 try:
     from yellowbrick import reset_orig
@@ -35,8 +34,7 @@ class TrainingTimeCurve(ModelVisualizer):
         self.train_sizes = train_sizes
 
     def fit(self, X, y=None, **fit_params):
-        X, y = check_X_y(X, y, estimator=self)
-        n_samples, _ = X.shape
+        n_samples = len(X)
 
         self.train_sizes_abs_ = _translate_train_sizes(
             self.train_sizes,
@@ -46,8 +44,8 @@ class TrainingTimeCurve(ModelVisualizer):
             [
                 compute_execution_time(
                     self.estimator.fit,
-                    X[:n_train_samples],
-                    y[:n_train_samples],
+                    safe_indexing(X, slice(0, n_train_samples)),
+                    safe_indexing(y, slice(0, n_train_samples)),
                     n_trials=self.n_trials,
                     **fit_params
                 ) for n_train_samples in self.train_sizes_abs_
