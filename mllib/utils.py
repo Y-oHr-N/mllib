@@ -1,6 +1,7 @@
 from time import perf_counter
 
 import numpy as np
+from sklearn.utils import safe_indexing as sklearn_safe_indexing
 
 optuna_is_installed = True
 
@@ -158,3 +159,10 @@ def get_param_distributions(estimator_name, prefix=None):
     param_distributions = dict_of_param_distributions[estimator_name]
 
     return add_prefix(param_distributions, prefix)
+
+
+def safe_indexing(X, indices):
+    if X is None:
+        return X
+    else:
+        return sklearn_safe_indexing(X, indices)

@@ -15,14 +15,13 @@ from sklearn.utils import (
     check_X_y,
     check_array,
     check_random_state,
-    gen_batches,
-    safe_indexing
+    gen_batches
 )
 from sklearn.utils.validation import check_is_fitted
 from tqdm import tqdm, trange
 
 from .base import BaseEstimator
-from .utils import check_sample_weight
+from .utils import check_sample_weight, safe_indexing
 
 LOSS_CLASSES = {
     'epsilon_insensitive': EpsilonInsensitive,
