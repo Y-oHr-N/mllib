@@ -16,7 +16,7 @@ def mean_arctangent_absolute_percentage_error(
         y_pred,
         multioutput
     )
-    n_samples, _ = y_true.shape
+    n_samples = len(y_true)
     sample_weight = check_sample_weight(sample_weight, n_samples)
 
     with np.errstate(divide='ignore', invalid='ignore'):
@@ -58,7 +58,7 @@ def mean_absolute_percentage_error(
         multioutput
     )
 
-    n_samples, _ = y_true.shape
+    n_samples = len(y_true)
     sample_weight = check_sample_weight(sample_weight, n_samples)
 
     with np.errstate(divide='ignore', invalid='ignore'):

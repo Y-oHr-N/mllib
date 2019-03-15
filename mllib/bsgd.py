@@ -147,7 +147,7 @@ def bsgd(
     loss_function = _get_loss_function(loss=loss, epsilon=epsilon)
     disable = verbose <= 0
     epochs = trange(max_iter, desc='epoch loop', disable=disable)
-    n_samples, _ = X.shape
+    n_samples = len(X)
     generator = gen_batches(n_samples, 1)
     batches = tqdm(generator, desc='round loop', disable=disable, leave=False)
 
@@ -209,7 +209,7 @@ def bsgd(
                 if verbose > 1:
                     tqdm.write(f'added the support vector', file=sys.stderr)
 
-            n_SV, _ = support_vectors.shape
+            n_SV = len(support_vectors)
 
             if n_SV > max_support:
                 abs_dual_coef = np.abs(dual_coef)
@@ -267,10 +267,10 @@ def _decision_function(
     kernel: str = 'linear'
 ) -> np.ndarray:
 
-    n_SV, _ = support_vectors.shape
+    n_SV = len(support_vectors)
 
     if n_SV == 0:
-        n_samples, _ = X.shape
+        n_samples = len(X)
 
         return np.zeros(n_samples)
 
