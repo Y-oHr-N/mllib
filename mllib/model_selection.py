@@ -21,15 +21,19 @@ except ImportError:
 
 
 class Objective:
-    """Objective function.
+    """Callable that implements objective function.
 
     Parameters
     ----------
     estimator
-        Object to use to fit the data.
+        Object to use to fit the data. This is assumed to implement the
+        scikit-learn estimator interface. Either this needs to provide
+        ``score``, or ``scoring`` must be passed.
 
     param_distributions
         Dictionary where keys are parameters and values are distributions.
+        Disributions are assumed to implement the optuna distribution
+        interface.
 
     X
         Training data.
@@ -38,23 +42,40 @@ class Objective:
         Target variable.
 
     cv
-        Cross-validation strategy.
+        Cross-validation strategy. Possible inputs for cv are:
+
+        - integer to specify the number of folds in a CV splitter,
+        - a CV splitter,
+        - an iterable yielding (train, test) splits as arrays of indices.
+
+        For integer, if ``estimator`` is a classifier and ``y`` is
+        either binary or multiclass, ``StratifiedKFold`` is used. otherwise,
+        ``KFold`` is used.
 
     error_score
-        Value to assign to the score if an error occurs in estimator fitting.
+        Value to assign to the score if an error occurs in fitting. If
+        ‘raise’, the error is raised. If numeric, ``FitFailedWarning`` is
+        raised. This does not affect the refit step, which will always raise
+        the error.
 
     fit_params
-        Parameters passed to the ``fit`` method of the estimator.
+        Parameters passed to ``fit`` one the estimator.
 
     groups
         Group labels for the samples used while splitting the dataset into
         train/test set.
 
     return_train_score
-        If True, training scores will be included.
+        If ``True``, training scores will be included. Computing training
+        scores is used to get insights on how different hyperparameter
+        settings impact the overfitting/underfitting trade-off. However
+        computing training scores can be computationally expensive and is not
+        strictly required to select the hyperparameters that yield the best
+        generalization performance.
 
     scoring
-        String or callable to evaluate the predictions on the test data.
+        String or callable to evaluate the predictions on the test data. If
+        ``None``, ``score`` on the estimator is used.
     """
 
     def __init__(
@@ -134,69 +155,107 @@ class Objective:
 
 
 class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
-    """Hyper parameter search with cross-validation.
+    """Hyperparameter search with cross-validation.
 
     Parameters
     ----------
     estimator
-        Object to use to fit the data.
+        Object to use to fit the data. This is assumed to implement the
+        scikit-learn estimator interface. Either this needs to provide
+        ``score``, or ``scoring`` must be passed.
 
     param_distributions
         Dictionary where keys are parameters and values are distributions.
+        Disributions are assumed to implement the optuna distribution
+        interface.
 
     cv
-        Cross-validation strategy.
+        Cross-validation strategy. Possible inputs for cv are:
+
+        - integer to specify the number of folds in a CV splitter,
+        - a CV splitter,
+        - an iterable yielding (train, test) splits as arrays of indices.
+
+        For integer, if ``estimator`` is a classifier and ``y`` is
+        either binary or multiclass, ``StratifiedKFold`` is used. otherwise,
+        ``KFold`` is used.
 
     error_score
-        Value to assign to the score if an error occurs in estimator fitting.
+        Value to assign to the score if an error occurs in fitting. If
+        ‘raise’, the error is raised. If numeric, ``FitFailedWarning`` is
+        raised. This does not affect the refit step, which will always raise
+        the error.
 
     load_if_exists
-        If True, the existing study is used in the case where a study named
+        If ``True``, the existing study is used in the case where a study named
         ``study_name`` already exists in the ``storage``.
 
     n_iter
-        Number of trials.
+        Number of trials. If ``None``, there is no limitation on the number of
+        trials. If ``timeout`` is also set to ``None``, the study continues to
+        create trials until it receives a termination signal such as Ctrl+C or
+        SIGTERM. This trades off runtime vs quality of the solution.
 
     n_jobs
-        Number of parallel jobs.
+        Number of parallel jobs. ``-1`` means using all processors.
 
     random_state
-        Seed of the pseudo random number generator.
+        Seed of the pseudo random number generator. If int, this is the seed
+        used by the random number generator. If ``RandomState`` object, this
+        is the random number generator. If ``None``, the random number
+        generator is the ``RandomState`` object used by ``numpy.random``.
 
     return_train_score
-        If True, training scores will be included.
+        If ``True``, training scores will be included. Computing training
+        scores is used to get insights on how different hyperparameter
+        settings impact the overfitting/underfitting trade-off. However
+        computing training scores can be computationally expensive and is not
+        strictly required to select the hyperparameters that yield the best
+        generalization performance.
 
     pruner
-        Pruner that decides early stopping of unpromising trials.
+        Pruner that decides early stopping of unpromising trials. If ``None``,
+        ``MedianPruner`` is used as the default.
 
     refit
-        If True, refit the estimator with the best found parameters.
+        If ``True``, refit the estimator with the best found hyperparameters.
+        The refitted estimator is made available at the ``best_estimator_``
+        attribute and permits using ``predict`` directly.
 
     scoring
-        String or callable to evaluate the predictions on the test data.
+        String or callable to evaluate the predictions on the test data. If
+        ``None``, ``score`` on the estimator is used.
 
     storage
-        Database URL.
+        Database URL. If ``None``, in-memory storage is used, and the
+        ``Study`` will not be persistent.
 
     study_name
-        name of the ``Study``.
+        name of the ``Study``. If ``None``, a unique name is generated
+        automatically.
 
     timeout
-        Time limit in seconds for the search of appropriate models.
+        Time limit in seconds for the search of appropriate models. If
+        ``None``, the study is executed without time limitation. If
+        ``n_trials`` is also set to ``None``, the study continues to create
+        trials until it receives a termination signal such as Ctrl+C or
+        SIGTERM. This trades off runtime vs quality of the solution.
 
     verbose
-        Verbosity level.
+        Verbosity level. The higher, the more messages.
 
     Attributes
     ----------
     best_estimator_
-        Estimator that was chosen by the search.
+        Estimator that was chosen by the search. This is present only if
+        ``refit`` is set to ``True``.
 
     n_splits_
         Number of cross-validation splits.
 
     refit_time_
-        Time for refitting the best estimator.
+        Time for refitting the best estimator. This is present only if
+        ``refit`` is set to ``True``.
 
     study_
         Study corresponds to the optimization task.
@@ -316,8 +375,9 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
     @property
     def decision_function(self):
         # type: () -> Callable[..., np.ndarray]
-        """Call decision_function on the estimator with the best found
-        parameters.
+        """Call ``decision_function`` on the estimator with the best found
+        parameters. This is available only if the underlying estimator
+        supports ``decision_function`` and ``refit`` is set to ``True``.
         """
 
         self._check_is_fitted()
@@ -327,8 +387,9 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
     @property
     def inverse_transform(self):
         # type: () -> Callable[..., np.ndarray]
-        """Call inverse_transform on the estimator with the best found
-        parameters.
+        """Call ``inverse_transform`` on the estimator with the best found
+        parameters. This is available only if the underlying estimator
+        supports ``inverse_transform`` and ``refit`` is set to ``True``.
         """
 
         self._check_is_fitted()
@@ -338,7 +399,9 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
     @property
     def predict(self):
         # type: () -> Callable[..., np.ndarray]
-        """Call predict on the estimator with the best found parameters.
+        """Call ``predict`` on the estimator with the best found parameters.
+        This is available only if the underlying estimator supports
+        ``predict`` and ``refit`` is set to ``True``.
         """
 
         self._check_is_fitted()
@@ -348,8 +411,9 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
     @property
     def predict_log_proba(self):
         # type: () -> Callable[..., np.ndarray]
-        """Call predict_log_proba on the estimator with the best found
-        parameters.
+        """Call ``predict_log_proba`` on the estimator with the best found
+        parameters. This is available only if the underlying estimator
+        supports ``predict_log_proba`` and ``refit`` is set to ``True``.
         """
 
         self._check_is_fitted()
@@ -359,7 +423,9 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
     @property
     def predict_proba(self):
         # type: () -> Callable[..., np.ndarray]
-        """Call predict_proba on the estimator with the best found parameters.
+        """Call ``predict_proba`` on the estimator with the best found
+        parameters. This is available only if the underlying estimator
+        supports ``predict_proba`` and ``refit`` is set to ``True``.
         """
 
         self._check_is_fitted()
@@ -369,7 +435,9 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
     @property
     def transform(self):
         # type: () -> Callable[..., np.ndarray]
-        """Call transform on the estimator with the best found parameters.
+        """Call ``transform`` on the estimator with the best found parameters.
+        This is available only if the underlying estimator supports
+        ``transform`` and ``refit`` is set to ``True``.
         """
 
         self._check_is_fitted()
@@ -379,7 +447,7 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
     @property
     def trials_dataframe(self):
         # type: () -> Callable[..., pd.DataFrame]
-        """Call trials_dataframe on the ``Study``.
+        """Call ``trials_dataframe`` on the ``Study``.
         """
 
         self._check_is_fitted()
@@ -499,7 +567,7 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
             train/test set.
 
         **fit_params
-            Parameters passed to the ``fit`` method of the estimator.
+            Parameters passed to ``fit`` on the estimator.
 
         Returns
         -------
