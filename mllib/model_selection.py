@@ -433,6 +433,18 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
         return self.best_estimator_.predict_proba
 
     @property
+    def score_samples(self):
+        # type: () -> Callable[..., np.ndarray]
+        """Call ``score_samples`` on the estimator with the best found
+        parameters. This is available only if the underlying estimator
+        supports ``score_samples`` and ``refit`` is set to ``True``.
+        """
+
+        self._check_is_fitted()
+
+        return self.best_estimator_.score_samples
+
+    @property
     def transform(self):
         # type: () -> Callable[..., np.ndarray]
         """Call ``transform`` on the estimator with the best found parameters.
