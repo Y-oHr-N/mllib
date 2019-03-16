@@ -11,6 +11,7 @@ from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
 
 from .base import BaseEstimator, is_estimator
+from .utils import safe_indexing
 
 optuna_is_installed = True
 
@@ -107,9 +108,65 @@ class Objective:
     def _cross_validate_with_pruning(self, trial, estimator):
         # type: (optuna.trial.Trial, BaseEstimator) -> Dict[str, np.ndarray]
 
-        raise NotImplementedError(
-            f'_cross_validate_with_pruning has not been implemented yet'
-        )
+        classifier = is_classifier(estimator)
+        cv = check_cv(self.cv, self.y, classifier)
+        n_splits = cv.get_n_splits(self.X, self.y, groups=self.groups)
+        scorer = check_scoring(estimator, scoring=self.scoring)
+        max_iter = estimator.max_iter
+        estimators = [clone(estimator) for _ in range(n_splits)]
+        fit_times = np.zeros(n_splits)
+        score_times = np.zeros(n_splits)
+        test_scores = np.empty(n_splits)
+
+        if self.return_train_score:
+            train_scores = np.empty(n_splits)
+
+        for step in range(max_iter):
+            for i, (train_index, test_index) in enumerate(
+                cv.split(self.X, self.y, groups=self.groups)
+            ):
+                X_train = safe_indexing(self.X, train_index)
+                X_test = safe_indexing(self.X, test_index)
+                y_train = safe_indexing(self.y, train_index)
+                y_test = safe_indexing(self.y, test_index)
+
+                start_time = perf_counter()
+
+                estimators[i].partial_fit(X_train, y_train, **self.fit_params)
+
+                finish_time = perf_counter()
+
+                test_scores[i] = scorer(estimators[i], X_test, y_test)
+
+                fit_times[i] += finish_time - start_time
+                score_times[i] += perf_counter() - finish_time
+
+                if self.return_train_score:
+                    train_scores[i] = scorer(
+                        estimators[i],
+                        X_train,
+                        y_train
+                    )
+
+            intermediate_value = - np.average(test_scores)
+
+            trial.report(intermediate_value, step=step)
+
+            if trial.should_prune(step):
+                raise optuna.structs.TrialPruned(
+                    'trial was pruned at iteration {}'.format(step)
+                )
+
+        cv_results = {
+            'fit_time': fit_times,
+            'score_time': score_times,
+            'test_score': test_scores
+        }
+
+        if self.return_train_score:
+            cv_results['train_score'] = train_scores
+
+        return cv_results
 
     def _get_params(self, trial):
         # type: (optuna.trial.Trial) -> Dict[str, Any]
