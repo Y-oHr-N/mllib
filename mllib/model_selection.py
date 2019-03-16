@@ -146,10 +146,10 @@ class Objective:
         for name, array in cv_results.items():
             if name in ['test_score', 'train_score']:
                 for i, score in enumerate(array):
-                    trial.set_user_attr(f'split{i}_{name}', score)
+                    trial.set_user_attr('split{}_{}'.format(i, name), score)
 
-            trial.set_user_attr(f'mean_{name}', np.average(array))
-            trial.set_user_attr(f'std_{name}', np.std(array))
+            trial.set_user_attr('mean_{}'.format(name), np.average(array))
+            trial.set_user_attr('std_{}'.format(name), np.std(array))
 
         return - trial.user_attrs['mean_test_score']
 
@@ -522,11 +522,11 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
 
         if not is_estimator(self.estimator):
             raise ValueError(
-                f'estimator must be a scikit-learn estimator'
+                'estimator must be a scikit-learn estimator'
             )
 
         if type(self.param_distributions) is not dict:
-            raise ValueError(f'param_distributions must be a dictionary')
+            raise ValueError('param_distributions must be a dictionary')
 
         for name, distribution in self.param_distributions.items():
             if not isinstance(
@@ -534,7 +534,7 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
                 optuna.distributions.BaseDistribution
             ):
                 raise ValueError(
-                    f'value of {name} must be a optuna distribution'
+                    'value of {} must be a optuna distribution'.format(name)
                 )
 
     def _refit(self, X, y=None, **fit_params):
