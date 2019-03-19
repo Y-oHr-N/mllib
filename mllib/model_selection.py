@@ -66,6 +66,10 @@ class Objective:
         Group labels for the samples used while splitting the dataset into
         train/test set.
 
+    max_iter
+        Maximum nember of epochs. This is only used if the underlying
+        estimator supports ``partial_fit``.
+
     return_train_score
         If ``True``, training scores will be included. Computing training
         scores is used to get insights on how different hyperparameter
@@ -89,6 +93,7 @@ class Objective:
         error_score=np.nan,
         fit_params=None,
         groups=None,
+        max_iter=1000,
         return_train_score=False,
         scoring=None
     ):
@@ -101,6 +106,7 @@ class Objective:
         self.estimator = estimator
         self.fit_params = fit_params
         self.groups = groups
+        self.max_iter = max_iter
         self.param_distributions = param_distributions
         self.return_train_score = return_train_score
         self.scoring = scoring
@@ -112,7 +118,6 @@ class Objective:
         cv = check_cv(self.cv, self.y, classifier)
         n_splits = cv.get_n_splits(self.X, self.y, groups=self.groups)
         scorer = check_scoring(estimator, scoring=self.scoring)
-        max_iter = estimator.max_iter
         estimators = [clone(estimator) for _ in range(n_splits)]
         fit_times = np.zeros(n_splits)
         score_times = np.zeros(n_splits)
@@ -121,7 +126,7 @@ class Objective:
         if self.return_train_score:
             train_scores = np.empty(n_splits)
 
-        for step in range(max_iter):
+        for step in range(self.max_iter):
             for i, (train_index, test_index) in enumerate(
                 cv.split(self.X, self.y, groups=self.groups)
             ):
@@ -250,7 +255,11 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
         If ``True``, the existing study is used in the case where a study named
         ``study_name`` already exists in the ``storage``.
 
-    n_iter
+    max_iter
+        Maximum nember of epochs. This is only used if the underlying
+        estimator supports ``partial_fit``.
+
+    n_trials
         Number of trials. If ``None``, there is no limitation on the number of
         trials. If ``timeout`` is also set to ``None``, the study continues to
         create trials until it receives a termination signal such as Ctrl+C or
@@ -413,7 +422,7 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
         return self.best_estimator_.classes_
 
     @property
-    def n_iter_(self):
+    def n_trials_(self):
         # type: () -> int
         """Actual number of trials.
         """
@@ -533,7 +542,8 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
         cv=5,
         error_score=np.nan,
         load_if_exists=False,
-        n_iter=10,
+        max_iter=1000,
+        n_trials=10,
         n_jobs=1,
         pruner=None,
         random_state=None,
@@ -554,7 +564,8 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
         self.error_score = error_score
         self.estimator = estimator
         self.load_if_exists = load_if_exists
-        self.n_iter = n_iter
+        self.max_iter = max_iter
+        self.n_trials = n_trials
         self.n_jobs = n_jobs
         self.param_distributions = param_distributions
         self.pruner = pruner
@@ -661,6 +672,7 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
             error_score=self.error_score,
             fit_params=fit_params,
             groups=groups,
+            max_iter=self.max_iter,
             return_train_score=self.return_train_score,
             scoring=self.scoring
         )
@@ -677,7 +689,7 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
         self.study_.optimize(
             objective,
             n_jobs=self.n_jobs,
-            n_trials=self.n_iter,
+            n_trials=self.n_trials,
             timeout=self.timeout
         )
 
