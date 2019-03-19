@@ -8,10 +8,10 @@ from sklearn.base import MetaEstimatorMixin, clone, is_classifier
 from sklearn.metrics import check_scoring
 from sklearn.model_selection import check_cv, cross_validate
 from sklearn.utils import check_random_state
+from sklearn.utils.metaestimators import _safe_split
 from sklearn.utils.validation import check_is_fitted
 
 from .base import BaseEstimator, is_estimator
-from .utils import safe_indexing
 
 optuna_is_installed = True
 
@@ -125,10 +125,13 @@ class Objective:
             for i, (train_index, test_index) in enumerate(
                 cv.split(self.X, self.y, groups=self.groups)
             ):
-                X_train = safe_indexing(self.X, train_index)
-                X_test = safe_indexing(self.X, test_index)
-                y_train = safe_indexing(self.y, train_index)
-                y_test = safe_indexing(self.y, test_index)
+                X_train, y_train = _safe_split(self.X, self.y, train_index)
+                X_test, y_test = _safe_split(
+                    self.X,
+                    self.y,
+                    test_index,
+                    train_indices=train_index
+                )
 
                 start_time = perf_counter()
 
