@@ -639,6 +639,11 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
                     'value of {} must be a optuna distribution'.format(name)
                 )
 
+        if self.max_iter <= 0:
+            raise ValueError(
+                'max_iter must be > 0, got {}'.format(self.max_iter)
+            )
+
     def _refit(self, X, y=None, **fit_params):
         # type: (np.ndarray, np.ndarray, Any) -> 'TPESearchCV'
 
