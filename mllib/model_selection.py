@@ -259,14 +259,14 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
         Maximum nember of epochs. This is only used if the underlying
         estimator supports ``partial_fit``.
 
+    n_jobs
+        Number of parallel jobs. ``-1`` means using all processors.
+
     n_trials
         Number of trials. If ``None``, there is no limitation on the number of
         trials. If ``timeout`` is also set to ``None``, the study continues to
         create trials until it receives a termination signal such as Ctrl+C or
         SIGTERM. This trades off runtime vs quality of the solution.
-
-    n_jobs
-        Number of parallel jobs. ``-1`` means using all processors.
 
     random_state
         Seed of the pseudo random number generator. If int, this is the seed
@@ -543,8 +543,8 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
         error_score=np.nan,
         load_if_exists=False,
         max_iter=1000,
-        n_trials=10,
         n_jobs=1,
+        n_trials=10,
         pruner=None,
         random_state=None,
         refit=True,
