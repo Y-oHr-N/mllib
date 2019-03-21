@@ -24,63 +24,64 @@ except ImportError:
 class Objective:
     """Callable that implements objective function.
 
-    Parameters
-    ----------
-    estimator
-        Object to use to fit the data. This is assumed to implement the
-        scikit-learn estimator interface. Either this needs to provide
-        ``score``, or ``scoring`` must be passed.
+    Args:
+        estimator:
+            Object to use to fit the data. This is assumed to implement the
+            scikit-learn estimator interface. Either this needs to provide
+            ``score``, or ``scoring`` must be passed.
 
-    param_distributions
-        Dictionary where keys are parameters and values are distributions.
-        Disributions are assumed to implement the optuna distribution
-        interface.
+        param_distributions:
+            Dictionary where keys are parameters and values are distributions.
+            Disributions are assumed to implement the optuna distribution
+            interface.
 
-    X
-        Training data.
+        X:
+            Training data.
 
-    y
-        Target variable.
+        y:
+            Target variable.
 
-    cv
-        Cross-validation strategy. Possible inputs for cv are:
+        cv:
+            Cross-validation strategy. Possible inputs for cv are:
 
-        - integer to specify the number of folds in a CV splitter,
-        - a CV splitter,
-        - an iterable yielding (train, test) splits as arrays of indices.
+            - integer to specify the number of folds in a CV splitter,
+            - a CV splitter,
+            - an iterable yielding (train, test) splits as arrays of indices.
 
-        For integer, if ``estimator`` is a classifier and ``y`` is
-        either binary or multiclass, ``StratifiedKFold`` is used. otherwise,
-        ``KFold`` is used.
+            For integer, if :obj:`estimator` is a classifier and :obj:`y` is
+            either binary or multiclass,
+            ``sklearn.model_selection.StratifiedKFold`` is used. otherwise,
+            ``sklearn.model_selection.KFold`` is used.
 
-    error_score
-        Value to assign to the score if an error occurs in fitting. If
-        ‘raise’, the error is raised. If numeric, ``FitFailedWarning`` is
-        raised. This does not affect the refit step, which will always raise
-        the error.
+        error_score:
+            Value to assign to the score if an error occurs in fitting. If
+            'raise', the error is raised. If numeric,
+            ``sklearn.exception.FitFailedWarning`` is raised. This does not
+            affect the refit step, which will always raise the error.
 
-    fit_params
-        Parameters passed to ``fit`` one the estimator.
+        fit_params:
+            Parameters passed to ``fit`` one the estimator.
 
-    groups
-        Group labels for the samples used while splitting the dataset into
-        train/test set.
+        groups:
+            Group labels for the samples used while splitting the dataset into
+            train/test set.
 
-    max_iter
-        Maximum nember of epochs. This is only used if the underlying
-        estimator supports ``partial_fit``.
+        max_iter:
+            Maximum nember of epochs. This is only used if the underlying
+            estimator supports ``partial_fit``.
 
-    return_train_score
-        If ``True``, training scores will be included. Computing training
-        scores is used to get insights on how different hyperparameter
-        settings impact the overfitting/underfitting trade-off. However
-        computing training scores can be computationally expensive and is not
-        strictly required to select the hyperparameters that yield the best
-        generalization performance.
+        return_train_score:
+            If :obj:`True`, training scores will be included. Computing
+            training scores is used to get insights on how different
+            hyperparameter settings impact the overfitting/underfitting
+            trade-off. However computing training scores can be
+            computationally expensive and is not strictly required to select
+            the hyperparameters that yield the best generalization
+            performance.
 
-    scoring
-        String or callable to evaluate the predictions on the test data. If
-        ``None``, ``score`` on the estimator is used.
+        scoring:
+            String or callable to evaluate the predictions on the test data.
+            If :obj:`None`, ``score`` on the estimator is used.
     """
 
     def __init__(
@@ -222,126 +223,135 @@ class Objective:
 class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
     """Hyperparameter search with cross-validation.
 
-    Parameters
-    ----------
-    estimator
-        Object to use to fit the data. This is assumed to implement the
-        scikit-learn estimator interface. Either this needs to provide
-        ``score``, or ``scoring`` must be passed.
+    Args:
+        estimator:
+            Object to use to fit the data. This is assumed to implement the
+            scikit-learn estimator interface. Either this needs to provide
+            ``score``, or ``scoring`` must be passed.
 
-    param_distributions
-        Dictionary where keys are parameters and values are distributions.
-        Disributions are assumed to implement the optuna distribution
-        interface.
+        param_distributions:
+            Dictionary where keys are parameters and values are distributions.
+            Disributions are assumed to implement the optuna distribution
+            interface.
 
-    cv
-        Cross-validation strategy. Possible inputs for cv are:
+        cv:
+            Cross-validation strategy. Possible inputs for cv are:
 
-        - integer to specify the number of folds in a CV splitter,
-        - a CV splitter,
-        - an iterable yielding (train, test) splits as arrays of indices.
+            - integer to specify the number of folds in a CV splitter,
+            - a CV splitter,
+            - an iterable yielding (train, test) splits as arrays of indices.
 
-        For integer, if ``estimator`` is a classifier and ``y`` is
-        either binary or multiclass, ``StratifiedKFold`` is used. otherwise,
-        ``KFold`` is used.
+            For integer, if :obj:`estimator` is a classifier and :obj:`y` is
+            either binary or multiclass,
+            ``sklearn.model_selection.StratifiedKFold`` is used. otherwise,
+            ``sklearn.model_selection.KFold`` is used.
 
-    error_score
-        Value to assign to the score if an error occurs in fitting. If
-        ‘raise’, the error is raised. If numeric, ``FitFailedWarning`` is
-        raised. This does not affect the refit step, which will always raise
-        the error.
+        error_score:
+            Value to assign to the score if an error occurs in fitting. If
+            'raise', the error is raised. If numeric,
+            ``sklearn.exception.FitFailedWarning`` is raised. This does not
+            affect the refit step, which will always raise the error.
 
-    load_if_exists
-        If ``True``, the existing study is used in the case where a study named
-        ``study_name`` already exists in the ``storage``.
+        load_if_exists:
+            If :obj:`True`, the existing study is used in the case where a
+            study named :obj:`study_name` already exists in the
+            :obj:`storage`.
 
-    max_iter
-        Maximum nember of epochs. This is only used if the underlying
-        estimator supports ``partial_fit``.
+        max_iter:
+            Maximum nember of epochs. This is only used if the underlying
+            estimator supports ``partial_fit``.
 
-    n_jobs
-        Number of parallel jobs. ``-1`` means using all processors.
+        n_jobs:
+            Number of parallel jobs. :obj:`-1` means using all processors.
 
-    n_trials
-        Number of trials. If ``None``, there is no limitation on the number of
-        trials. If ``timeout`` is also set to ``None``, the study continues to
-        create trials until it receives a termination signal such as Ctrl+C or
-        SIGTERM. This trades off runtime vs quality of the solution.
+        n_trials:
+            Number of trials. If :obj:`None`, there is no limitation on the
+            number of trials. If :obj:`timeout` is also set to :obj:`None`,
+            the study continues to create trials until it receives a
+            termination signal such as Ctrl+C or SIGTERM. This trades off
+            runtime vs quality of the solution.
 
-    random_state
-        Seed of the pseudo random number generator. If int, this is the seed
-        used by the random number generator. If ``RandomState`` object, this
-        is the random number generator. If ``None``, the random number
-        generator is the ``RandomState`` object used by ``numpy.random``.
+        random_state:
+            Seed of the pseudo random number generator. If int, this is the
+            seed used by the random number generator. If
+            ``numpy.random.RandomState`` object, this is the random number
+            generator. If :obj:`None`, the global random state from
+            ``numpy.random`` is used.
 
-    return_train_score
-        If ``True``, training scores will be included. Computing training
-        scores is used to get insights on how different hyperparameter
-        settings impact the overfitting/underfitting trade-off. However
-        computing training scores can be computationally expensive and is not
-        strictly required to select the hyperparameters that yield the best
-        generalization performance.
+        return_train_score:
+            If :obj:`True`, training scores will be included. Computing
+            training scores is used to get insights on how different
+            hyperparameter settings impact the overfitting/underfitting
+            trade-off. However computing training scores can be
+            computationally expensive and is not strictly required to select
+            the hyperparameters that yield the best generalization
+            performance.
 
-    pruner
-        Pruner that decides early stopping of unpromising trials. If ``None``,
-        ``MedianPruner`` is used as the default.
+        pruner:
+            Pruner that decides early stopping of unpromising trials. If
+            :obj:`None`, :class:`~optuna.sampler.MedianPruner` is used as the
+            default.
 
-    refit
-        If ``True``, refit the estimator with the best found hyperparameters.
-        The refitted estimator is made available at the ``best_estimator_``
-        attribute and permits using ``predict`` directly.
+        refit:
+            If :obj:`True`, refit the estimator with the best found
+            hyperparameters. The refitted estimator is made available at the
+            ``best_estimator_`` attribute and permits using ``predict``
+            directly.
 
-    scoring
-        String or callable to evaluate the predictions on the test data. If
-        ``None``, ``score`` on the estimator is used.
+        scoring:
+            String or callable to evaluate the predictions on the test data.
+            If :obj:`None`, ``score`` on the estimator is used.
 
-    storage
-        Database URL. If ``None``, in-memory storage is used, and the
-        ``Study`` will not be persistent.
+        storage:
+            Database URL. If :obj:`None`, in-memory storage is used, and the
+            :class:`~optuna.study.Study` will not be persistent.
 
-    study_name
-        name of the ``Study``. If ``None``, a unique name is generated
-        automatically.
+        study_name:
+            name of the :class:`~optuna.study.Study`. If :obj:`None`, a unique
+            name is generated automatically.
 
-    timeout
-        Time limit in seconds for the search of appropriate models. If
-        ``None``, the study is executed without time limitation. If
-        ``n_trials`` is also set to ``None``, the study continues to create
-        trials until it receives a termination signal such as Ctrl+C or
-        SIGTERM. This trades off runtime vs quality of the solution.
+        timeout:
+            Time limit in seconds for the search of appropriate models. If
+            :obj:`None`, the study is executed without time limitation. If
+            :obj:`n_trials` is also set to :obj:`None`, the study continues to
+            create trials until it receives a termination signal such as
+            Ctrl+C or SIGTERM. This trades off runtime vs quality of the
+            solution.
 
-    verbose
-        Verbosity level. The higher, the more messages.
+        verbose:
+            Verbosity level. The higher, the more messages.
 
-    Attributes
-    ----------
-    best_estimator_
-        Estimator that was chosen by the search. This is present only if
-        ``refit`` is set to ``True``.
+    Attributes:
+        best_estimator_:
+            Estimator that was chosen by the search. This is present only if
+            ``refit`` is set to :obj:`True`.
 
-    n_splits_
-        Number of cross-validation splits.
+        n_splits_:
+            Number of cross-validation splits.
 
-    refit_time_
-        Time for refitting the best estimator. This is present only if
-        ``refit`` is set to ``True``.
+        refit_time_:
+            Time for refitting the best estimator. This is present only if
+            ``refit`` is set to :obj:`True`.
 
-    study_
-        Study corresponds to the optimization task.
+        study_:
+            Study corresponds to the optimization task.
 
-    Examples
-    --------
-    >>> from mllib.model_selection import TPESearchCV
-    >>> from optuna.distributions import LogUniformDistribution
-    >>> from sklearn.datasets import load_iris
-    >>> from sklearn.svm import SVC
-    >>> clf = SVC(gamma='auto')
-    >>> param_distributions = {'C': LogUniformDistribution(1e-10, 1e+10)}
-    >>> tpe_search = TPESearchCV(clf, param_distributions)
-    >>> X, y = load_iris(return_X_y=True)
-    >>> tpe_search.fit(X, y) # doctest: +ELLIPSIS
-    TPESearchCV(...)
-    >>> y_pred = tpe_search.predict(X)
+    Examples:
+        >>> import optuna
+        >>> from sklearn.datasets import load_iris
+        >>> from sklearn.svm import SVC
+        >>> clf = SVC(gamma='auto')
+        >>> param_distributions = {
+        ...     'C': optuna.distributions.LogUniformDistribution(1e-10, 1e+10)
+        ... }
+        >>> tpe_search = optuna.integration.TPESearchCV(
+        ...     clf,
+        ...     param_distributions
+        ... )
+        >>> X, y = load_iris(return_X_y=True)
+        >>> tpe_search.fit(X, y) # doctest: +ELLIPSIS
+        TPESearchCV(...)
+        >>> y_pred = tpe_search.predict(X)
     """
 
     @property
@@ -374,7 +384,7 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
     @property
     def best_params_(self):
         # type: () -> Dict[str, Any]
-        """Parameters of the best trial in the ``Study``.
+        """Parameters of the best trial in the :class:`~optuna.study.Study`.
         """
 
         self._check_is_fitted()
@@ -394,7 +404,7 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
     @property
     def best_trial_(self):
         # type: () -> optuna.structs.FrozenTrial
-        """Best trial in the ``Study``.
+        """Best trial in the :class:`~optuna.study.Study`.
         """
 
         self._check_is_fitted()
@@ -404,7 +414,7 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
     @property
     def best_value_(self):
         # type: () -> float
-        """Best objective value in the ``Study``.
+        """Best objective value in the :class:`~optuna.study.Study`.
         """
 
         self._check_is_fitted()
@@ -446,7 +456,7 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
         # type: () -> Callable[..., np.ndarray]
         """Call ``decision_function`` on the estimator with the best found
         parameters. This is available only if the underlying estimator
-        supports ``decision_function`` and ``refit`` is set to ``True``.
+        supports ``decision_function`` and ``refit`` is set to :obj:`True`.
         """
 
         self._check_is_fitted()
@@ -458,7 +468,7 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
         # type: () -> Callable[..., np.ndarray]
         """Call ``inverse_transform`` on the estimator with the best found
         parameters. This is available only if the underlying estimator
-        supports ``inverse_transform`` and ``refit`` is set to ``True``.
+        supports ``inverse_transform`` and ``refit`` is set to :obj:`True`.
         """
 
         self._check_is_fitted()
@@ -470,7 +480,7 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
         # type: () -> Callable[..., np.ndarray]
         """Call ``predict`` on the estimator with the best found parameters.
         This is available only if the underlying estimator supports
-        ``predict`` and ``refit`` is set to ``True``.
+        ``predict`` and ``refit`` is set to :obj:`True`.
         """
 
         self._check_is_fitted()
@@ -482,7 +492,7 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
         # type: () -> Callable[..., np.ndarray]
         """Call ``predict_log_proba`` on the estimator with the best found
         parameters. This is available only if the underlying estimator
-        supports ``predict_log_proba`` and ``refit`` is set to ``True``.
+        supports ``predict_log_proba`` and ``refit`` is set to :obj:`True`.
         """
 
         self._check_is_fitted()
@@ -494,7 +504,7 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
         # type: () -> Callable[..., np.ndarray]
         """Call ``predict_proba`` on the estimator with the best found
         parameters. This is available only if the underlying estimator
-        supports ``predict_proba`` and ``refit`` is set to ``True``.
+        supports ``predict_proba`` and ``refit`` is set to :obj:`True`.
         """
 
         self._check_is_fitted()
@@ -506,7 +516,7 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
         # type: () -> Callable[..., np.ndarray]
         """Call ``score_samples`` on the estimator with the best found
         parameters. This is available only if the underlying estimator
-        supports ``score_samples`` and ``refit`` is set to ``True``.
+        supports ``score_samples`` and ``refit`` is set to :obj:`True`.
         """
 
         self._check_is_fitted()
@@ -518,7 +528,7 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
         # type: () -> Callable[..., np.ndarray]
         """Call ``transform`` on the estimator with the best found parameters.
         This is available only if the underlying estimator supports
-        ``transform`` and ``refit`` is set to ``True``.
+        ``transform`` and ``refit`` is set to :obj:`True`.
         """
 
         self._check_is_fitted()
@@ -528,7 +538,7 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
     @property
     def trials_dataframe(self):
         # type: () -> Callable[..., pd.DataFrame]
-        """Call ``trials_dataframe`` on the ``Study``.
+        """Call ``trials_dataframe`` on the :class:`~optuna.study.Study`.
         """
 
         self._check_is_fitted()
@@ -637,25 +647,23 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
         # type: (np.ndarray, np.ndarray, np.ndarray, Any) -> 'TPESearchCV'
         """Run fit with all sets of parameters.
 
-        Parameters
-        ----------
-        X
-            Training data.
+        Args:
+            X:
+                Training data.
 
-        y
-            Target variable.
+            y:
+                Target variable.
 
-        groups
-            Group labels for the samples used while splitting the dataset into
-            train/test set.
+            groups:
+                Group labels for the samples used while splitting the dataset
+                into train/test set.
 
-        **fit_params
-            Parameters passed to ``fit`` on the estimator.
+            **fit_params:
+                Parameters passed to ``fit`` on the estimator.
 
-        Returns
-        -------
-        self
-            Return self.
+        Returns:
+            self:
+                Return self.
         """
 
         self._check_params()
@@ -702,18 +710,16 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
         # type: (np.ndarray, np.ndarray) -> float
         """Return the score on the given data.
 
-        Parameters
-        ----------
-        X
-            Data.
+        Args:
+            X:
+                Data.
 
-        y
-            Target variable.
+            y:
+                Target variable.
 
-        Returns
-        -------
-        score
-            Scaler score.
+        Returns:
+            score:
+                Scaler score.
         """
 
         return self.scorer_(self.best_estimator_, X, y)
