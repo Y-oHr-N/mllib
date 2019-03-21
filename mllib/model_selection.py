@@ -135,13 +135,15 @@ class Objective:
         self.return_train_score = return_train_score
         self.scoring = scoring
 
+        classifier = is_classifier(estimator)
+
+        self._cv = check_cv(cv, y, classifier)
+        self._scorer = check_scoring(estimator, scoring=scoring)
+
     def _cross_validate_with_pruning(self, trial, estimator):
         # type: (trial_module.Trial, BaseEstimator) -> Dict[str, np.ndarray]
 
-        classifier = is_classifier(estimator)
-        cv = check_cv(self.cv, self.y, classifier)
-        n_splits = cv.get_n_splits(self.X, self.y, groups=self.groups)
-        scorer = check_scoring(estimator, scoring=self.scoring)
+        n_splits = self._cv.get_n_splits(self.X, self.y, groups=self.groups)
         estimators = [clone(estimator) for _ in range(n_splits)]
         fit_times = np.zeros(n_splits)
         score_times = np.zeros(n_splits)
@@ -152,7 +154,7 @@ class Objective:
 
         for step in range(self.max_iter):
             for i, (train_index, test_index) in enumerate(
-                cv.split(self.X, self.y, groups=self.groups)
+                self._cv.split(self.X, self.y, groups=self.groups)
             ):
                 X_train, y_train = _safe_split(self.X, self.y, train_index)
                 X_test, y_test = _safe_split(
@@ -168,13 +170,13 @@ class Objective:
 
                 finish_time = perf_counter()
 
-                test_scores[i] = scorer(estimators[i], X_test, y_test)
+                test_scores[i] = self._scorer(estimators[i], X_test, y_test)
 
                 fit_times[i] += finish_time - start_time
                 score_times[i] += perf_counter() - finish_time
 
                 if self.return_train_score:
-                    train_scores[i] = scorer(
+                    train_scores[i] = self._scorer(
                         estimators[i],
                         X_train,
                         y_train
@@ -224,12 +226,12 @@ class Objective:
                 estimator,
                 self.X,
                 self.y,
-                cv=self.cv,
+                cv=self._cv,
                 error_score=self.error_score,
                 fit_params=self.fit_params,
                 groups=self.groups,
                 return_train_score=self.return_train_score,
-                scoring=self.scoring
+                scoring=self._scorer
             )
 
         for name, array in cv_results.items():
