@@ -1,10 +1,15 @@
-import logging
+from logging import DEBUG, INFO, WARNING
 from time import perf_counter
-from typing import Any, Callable, Dict # noqa
+from typing import Any, Callable, Dict # NOQA
 
 import numpy as np
-import optuna
-import pandas as pd # noqa
+import pandas as pd # NOQA
+from optuna import distributions
+from optuna import logging
+from optuna import samplers
+from optuna import structs
+from optuna import study
+from optuna import trial as trial_module # NOQA
 
 try:
     from sklearn.base import (
@@ -131,7 +136,7 @@ class Objective:
         self.scoring = scoring
 
     def _cross_validate_with_pruning(self, trial, estimator):
-        # type: (optuna.trial.Trial, BaseEstimator) -> Dict[str, np.ndarray]
+        # type: (trial_module.Trial, BaseEstimator) -> Dict[str, np.ndarray]
 
         classifier = is_classifier(estimator)
         cv = check_cv(self.cv, self.y, classifier)
@@ -180,7 +185,7 @@ class Objective:
             trial.report(intermediate_value, step=step)
 
             if trial.should_prune(step):
-                raise optuna.structs.TrialPruned(
+                raise structs.TrialPruned(
                     'trial was pruned at iteration {}'.format(step)
                 )
 
@@ -196,7 +201,7 @@ class Objective:
         return cv_results
 
     def _get_params(self, trial):
-        # type: (optuna.trial.Trial) -> Dict[str, Any]
+        # type: (trial_module.Trial) -> Dict[str, Any]
 
         return {
             name: trial._suggest(
@@ -205,7 +210,7 @@ class Objective:
         }
 
     def __call__(self, trial):
-        # type: (optuna.trial.Trial) -> float
+        # type: (trial_module.Trial) -> float
 
         estimator = clone(self.estimator)
         params = self._get_params(trial)
@@ -380,12 +385,12 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
 
     @property
     def _sampler(self):
-        # type: () -> optuna.samplers.TPESampler
+        # type: () -> samplers.TPESampler
 
         random_state = check_random_state(self.random_state)
         seed = random_state.randint(0, np.iinfo(np.int32).max)
 
-        return optuna.samplers.TPESampler(seed=seed)
+        return samplers.TPESampler(seed=seed)
 
     @property
     def best_index_(self):
@@ -421,7 +426,7 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
 
     @property
     def best_trial_(self):
-        # type: () -> optuna.structs.FrozenTrial
+        # type: () -> structs.FrozenTrial
         """Best trial in the :class:`~optuna.study.Study`.
         """
 
@@ -627,10 +632,7 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
             raise ValueError('param_distributions must be a dictionary')
 
         for name, distribution in self.param_distributions.items():
-            if not isinstance(
-                distribution,
-                optuna.distributions.BaseDistribution
-            ):
+            if not isinstance(distribution, distributions.BaseDistribution):
                 raise ValueError(
                     'value of {} must be a optuna distribution'.format(name)
                 )
@@ -654,11 +656,11 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
         # type: () -> None
 
         if self.verbose > 1:
-            optuna.logging.set_verbosity(logging.DEBUG)
+            logging.set_verbosity(DEBUG)
         elif self.verbose > 0:
-            optuna.logging.set_verbosity(logging.INFO)
+            logging.set_verbosity(INFO)
         else:
-            optuna.logging.set_verbosity(logging.WARNING)
+            logging.set_verbosity(WARNING)
 
     def fit(self, X, y=None, groups=None, **fit_params):
         # type: (np.ndarray, np.ndarray, np.ndarray, Any) -> 'TPESearchCV'
@@ -703,7 +705,7 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
         )
 
         self.n_splits_ = cv.get_n_splits(X, y, groups=groups)
-        self.study_ = optuna.create_study(
+        self.study_ = study.create_study(
             load_if_exists=self.load_if_exists,
             pruner=self.pruner,
             sampler=self._sampler,
