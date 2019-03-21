@@ -3,22 +3,40 @@ from time import perf_counter
 from typing import Any, Callable, Dict # noqa
 
 import numpy as np
+import optuna
 import pandas as pd # noqa
-from sklearn.base import MetaEstimatorMixin, clone, is_classifier
-from sklearn.metrics import check_scoring
-from sklearn.model_selection import check_cv, cross_validate
-from sklearn.utils import check_random_state
-from sklearn.utils.metaestimators import _safe_split
-from sklearn.utils.validation import check_is_fitted
-
-from .base import BaseEstimator, is_estimator
-
-optuna_is_installed = True
 
 try:
-    import optuna
-except ImportError:
-    optuna_is_installed = False
+    from sklearn.base import (
+        BaseEstimator,
+        MetaEstimatorMixin,
+        clone,
+        is_classifier
+    )
+    from sklearn.metrics import check_scoring
+    from sklearn.model_selection import check_cv, cross_validate
+    from sklearn.utils import check_random_state
+    from sklearn.utils.metaestimators import _safe_split
+    from sklearn.utils.validation import check_is_fitted
+
+    _available = True
+
+except ImportError as e:
+    _import_error = e
+    _available = False
+
+
+def _check_sklearn_availability():
+    # type: () -> None
+
+    if not _available:
+        raise ImportError(
+            'scikit-learn is not available. Please install scikit-learn to use '
+            'this feature. scikit-learn can be installed by executing `$ pip '
+            'install scikit-learn`. For further information, please refer to '
+            'the installation guide of scikit-learn. (The actual import error '
+            'is as follows: ' + str(_import_error) + ')'
+        )
 
 
 class Objective:
@@ -567,8 +585,7 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
     ):
         # type: (...) -> None
 
-        if not optuna_is_installed:
-            raise ImportError('optuna is not installed')
+        _check_sklearn_availability()
 
         self.cv = cv
         self.error_score = error_score
@@ -601,7 +618,7 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
     def _check_params(self):
         # type: () -> None
 
-        if not is_estimator(self.estimator):
+        if not hasattr(self.estimator, 'fit'):
             raise ValueError(
                 'estimator must be a scikit-learn estimator'
             )
