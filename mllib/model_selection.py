@@ -141,6 +141,39 @@ class Objective:
         self._cv = check_cv(cv, y, classifier)
         self._scorer = check_scoring(estimator, scoring=scoring)
 
+    def __call__(self, trial):
+        # type: (trial_module.Trial) -> float
+
+        estimator = clone(self.estimator)
+        params = self._get_params(trial)
+
+        estimator.set_params(**params)
+
+        if hasattr(estimator, 'partial_fit'):
+            cv_results = self._cross_validate_with_pruning(trial, estimator)
+        else:
+            cv_results = cross_validate(
+                estimator,
+                self.X,
+                self.y,
+                cv=self._cv,
+                error_score=self.error_score,
+                fit_params=self.fit_params,
+                groups=self.groups,
+                return_train_score=self.return_train_score,
+                scoring=self._scorer
+            )
+
+        for name, array in cv_results.items():
+            if name in ['test_score', 'train_score']:
+                for i, score in enumerate(array):
+                    trial.set_user_attr('split{}_{}'.format(i, name), score)
+
+            trial.set_user_attr('mean_{}'.format(name), np.average(array))
+            trial.set_user_attr('std_{}'.format(name), np.std(array))
+
+        return - trial.user_attrs['mean_test_score']
+
     def _cross_validate_with_pruning(self, trial, estimator):
         # type: (trial_module.Trial, BaseEstimator) -> Dict[str, np.ndarray]
 
@@ -240,39 +273,6 @@ class Objective:
             ret.insert(0, train_score)
 
         return ret
-
-    def __call__(self, trial):
-        # type: (trial_module.Trial) -> float
-
-        estimator = clone(self.estimator)
-        params = self._get_params(trial)
-
-        estimator.set_params(**params)
-
-        if hasattr(estimator, 'partial_fit'):
-            cv_results = self._cross_validate_with_pruning(trial, estimator)
-        else:
-            cv_results = cross_validate(
-                estimator,
-                self.X,
-                self.y,
-                cv=self._cv,
-                error_score=self.error_score,
-                fit_params=self.fit_params,
-                groups=self.groups,
-                return_train_score=self.return_train_score,
-                scoring=self._scorer
-            )
-
-        for name, array in cv_results.items():
-            if name in ['test_score', 'train_score']:
-                for i, score in enumerate(array):
-                    trial.set_user_attr('split{}_{}'.format(i, name), score)
-
-            trial.set_user_attr('mean_{}'.format(name), np.average(array))
-            trial.set_user_attr('std_{}'.format(name), np.std(array))
-
-        return - trial.user_attrs['mean_test_score']
 
 
 class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
