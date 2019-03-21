@@ -3,8 +3,6 @@ from time import perf_counter
 import numpy as np
 from sklearn.utils import safe_indexing as sklearn_safe_indexing
 
-optuna_is_installed = True
-
 try:
     from optuna.distributions import (
         CategoricalDistribution,
@@ -13,6 +11,9 @@ try:
         LogUniformDistribution,
         UniformDistribution
     )
+
+    optuna_is_installed = True
+
 except ImportError:
     optuna_is_installed = False
 

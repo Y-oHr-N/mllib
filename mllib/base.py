@@ -3,16 +3,19 @@ from abc import ABC, abstractmethod
 from sklearn.base import BaseEstimator as SKLearnBaseEstimator
 from sklearn.externals.joblib import dump
 
-lgb_is_installed = True
-xgb_is_installed = True
-
 try:
     import lightgbm as lgb
+
+    lgb_is_installed = True
+
 except ImportError:
     lgb_is_installed = False
 
 try:
     import xgboost as xgb
+
+    xgb_is_installed = True
+
 except ImportError:
     xgb_is_installed = False
 

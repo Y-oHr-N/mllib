@@ -9,6 +9,8 @@ try:
 
     reset_orig()
 
+    yellowbrick_is_installed = True
+
 except ImportError:
     ModelVisualizer = object
     yellowbrick_is_installed = False
