@@ -88,7 +88,7 @@ def get_param_distributions(estimator_name, prefix=None):
             'weights': CategoricalDistribution(['distance', 'uniform'])
         },
         'LGBMClassifier': {
-            'boosting_type': CategoricalDistribution(['gbdt', 'dart']),
+            'boosting_type': CategoricalDistribution(['gbdt', 'goss', 'dart']),
             'colsample_bytree': DiscreteUniformDistribution(0.05, 1.0, 0.05),
             'learning_rate': LogUniformDistribution(0.001, 1.0),
             'max_depth': IntUniformDistribution(1, 10),
@@ -130,7 +130,7 @@ def get_param_distributions(estimator_name, prefix=None):
             'weights': CategoricalDistribution(['distance', 'uniform'])
         },
         'LGBMRegressor': {
-            'boosting_type': CategoricalDistribution(['gbdt', 'dart']),
+            'boosting_type': CategoricalDistribution(['gbdt', 'goss', 'dart']),
             'colsample_bytree': DiscreteUniformDistribution(0.05, 1.0, 0.05),
             'learning_rate': LogUniformDistribution(0.001, 1.0),
             'max_depth': IntUniformDistribution(1, 10),
