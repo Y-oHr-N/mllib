@@ -1,6 +1,7 @@
 from logging import DEBUG, INFO, WARNING
+from numbers import Number
 from time import perf_counter
-from typing import Any, Callable, Dict # NOQA
+from typing import Any, Callable, Dict, List # NOQA
 
 import numpy as np
 import pandas as pd # NOQA
@@ -153,36 +154,19 @@ class Objective:
             train_scores = np.empty(n_splits)
 
         for step in range(self.max_iter):
-            for i, (train_index, test_index) in enumerate(
+            for i, (train, test) in enumerate(
                 self._cv.split(self.X, self.y, groups=self.groups)
             ):
-                X_train, y_train = _safe_split(self.X, self.y, train_index)
-                X_test, y_test = _safe_split(
-                    self.X,
-                    self.y,
-                    test_index,
-                    train_indices=train_index
-                )
-
-                start_time = perf_counter()
-
-                estimators[i].partial_fit(X_train, y_train, **self.fit_params)
-
-                finish_time = perf_counter()
-
-                test_scores[i] = self._scorer(estimators[i], X_test, y_test)
-
-                fit_times[i] += finish_time - start_time
-                score_times[i] += perf_counter() - finish_time
+                ret = self._partial_fit_and_score(estimators[i], train, test)
 
                 if self.return_train_score:
-                    train_scores[i] = self._scorer(
-                        estimators[i],
-                        X_train,
-                        y_train
-                    )
+                    train_scores[i] = ret.pop(0)
 
-            intermediate_value = - np.average(test_scores)
+                test_scores[i] = ret[0]
+                fit_times[i] += ret[1]
+                score_times[i] += ret[2]
+
+            intermediate_value = - np.nanmean(test_scores)
 
             trial.report(intermediate_value, step=step)
 
@@ -210,6 +194,52 @@ class Objective:
                 name, distribution
             ) for name, distribution in self.param_distributions.items()
         }
+
+    def _partial_fit_and_score(self, estimator, train, test):
+        # type: (BaseEstimator, List[int], List[int]) -> List[float]
+
+        X_train, y_train = _safe_split(self.X, self.y, train)
+        X_test, y_test = _safe_split(
+            self.X,
+            self.y,
+            test,
+            train_indices=train
+        )
+
+        start_time = perf_counter()
+
+        try:
+            estimator.partial_fit(X_train, y_train, **self.fit_params)
+
+        except Exception as e:
+            if self.error_score == 'raise':
+                raise e
+
+            elif isinstance(self.error_score, Number):
+                fit_time = perf_counter() - start_time
+                test_score = self.error_score
+                score_time = 0.0
+
+                if self.return_train_score:
+                    train_score = self.error_score
+
+            else:
+                raise ValueError("error_score must be 'raise' or numeric.")
+
+        else:
+            fit_time = perf_counter() - start_time
+            test_score = self._scorer(estimator, X_test, y_test)
+            score_time = perf_counter() - fit_time - start_time
+
+            if self.return_train_score:
+                train_score = self._scorer(estimator, X_train, y_train)
+
+        ret = [test_score, fit_time, score_time]
+
+        if self.return_train_score:
+            ret.insert(0, train_score)
+
+        return ret
 
     def __call__(self, trial):
         # type: (trial_module.Trial) -> float
