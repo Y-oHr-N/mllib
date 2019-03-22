@@ -144,9 +144,9 @@ class Objective:
         estimator.set_params(**params)
 
         if hasattr(estimator, 'partial_fit'):
-            cv_results = self._cross_validate_with_pruning(trial, estimator)
+            scores = self._cross_validate_with_pruning(trial, estimator)
         else:
-            cv_results = cross_validate(
+            scores = cross_validate(
                 estimator,
                 self.X,
                 self.y,
@@ -158,13 +158,7 @@ class Objective:
                 scoring=self.scoring
             )
 
-        for name, array in cv_results.items():
-            if name in ['test_score', 'train_score']:
-                for i, score in enumerate(array):
-                    trial.set_user_attr('split{}_{}'.format(i, name), score)
-
-            trial.set_user_attr('mean_{}'.format(name), np.average(array))
-            trial.set_user_attr('std_{}'.format(name), np.std(array))
+        self._store_scores(trial, scores)
 
         return - trial.user_attrs['mean_test_score']
 
@@ -182,14 +176,14 @@ class Objective:
 
         n_splits = self.cv.get_n_splits(self.X, self.y, groups=self.groups)
         estimators = [clone(estimator) for _ in range(n_splits)]
-        cv_results = {
+        scores = {
             'fit_time': np.zeros(n_splits),
             'score_time': np.zeros(n_splits),
             'test_score': np.empty(n_splits)
         }
 
         if self.return_train_score:
-            cv_results['train_score'] = np.empty(n_splits)
+            scores['train_score'] = np.empty(n_splits)
 
         for step in range(self.max_iter):
             for i, (train, test) in enumerate(
@@ -203,22 +197,24 @@ class Objective:
                 )
 
                 if self.return_train_score:
-                    cv_results['train_score'][i] = out.pop(0)
+                    scores['train_score'][i] = out.pop(0)
 
-                cv_results['test_score'][i] = out[0]
-                cv_results['fit_time'][i] += out[1]
-                cv_results['score_time'][i] += out[2]
+                scores['test_score'][i] = out[0]
+                scores['fit_time'][i] += out[1]
+                scores['score_time'][i] += out[2]
 
-            intermediate_value = - np.nanmean(cv_results['test_score'])
+            intermediate_value = - np.nanmean(scores['test_score'])
 
             trial.report(intermediate_value, step=step)
 
             if trial.should_prune(step):
+                self._store_scores(trial, scores)
+
                 raise structs.TrialPruned(
                     'trial was pruned at iteration {}'.format(step)
                 )
 
-        return cv_results
+        return scores
 
     def _get_params(self, trial):
         # type: (trial_module.Trial) -> Dict[str, Any]
@@ -281,6 +277,17 @@ class Objective:
             ret.insert(0, train_score)
 
         return ret
+
+    def _store_scores(self, trial, scores):
+        # type: (trial_module.Trial, Dict[str, float]) -> None
+
+        for name, array in scores.items():
+            if name in ['test_score', 'train_score']:
+                for i, score in enumerate(array):
+                    trial.set_user_attr('split{}_{}'.format(i, name), score)
+
+            trial.set_user_attr('mean_{}'.format(name), np.average(array))
+            trial.set_user_attr('std_{}'.format(name), np.std(array))
 
 
 class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
