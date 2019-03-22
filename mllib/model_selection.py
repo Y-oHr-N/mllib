@@ -104,8 +104,7 @@ class Objective:
             performance.
 
         scoring:
-            String or callable to evaluate the predictions on the test data.
-            If :obj:`None`, ``score`` on the estimator is used.
+            Scorer function.
     """
 
     def __init__(
@@ -136,11 +135,6 @@ class Objective:
         self.return_train_score = return_train_score
         self.scoring = scoring
 
-        classifier = is_classifier(estimator)
-
-        self._cv = check_cv(cv, y, classifier)
-        self._scorer = check_scoring(estimator, scoring=scoring)
-
     def __call__(self, trial):
         # type: (trial_module.Trial) -> float
 
@@ -156,12 +150,12 @@ class Objective:
                 estimator,
                 self.X,
                 self.y,
-                cv=self._cv,
+                cv=self.cv,
                 error_score=self.error_score,
                 fit_params=self.fit_params,
                 groups=self.groups,
                 return_train_score=self.return_train_score,
-                scoring=self._scorer
+                scoring=self.scoring
             )
 
         for name, array in cv_results.items():
@@ -177,29 +171,45 @@ class Objective:
     def _cross_validate_with_pruning(self, trial, estimator):
         # type: (trial_module.Trial, BaseEstimator) -> Dict[str, np.ndarray]
 
-        n_splits = self._cv.get_n_splits(self.X, self.y, groups=self.groups)
+        if is_classifier(estimator):
+            partial_fit_params = self.fit_params.copy()
+            classes = np.unique(self.y)
+
+            partial_fit_params.setdefault('classes', classes)
+
+        else:
+            partial_fit_params = self.fit_params
+
+        n_splits = self.cv.get_n_splits(self.X, self.y, groups=self.groups)
         estimators = [clone(estimator) for _ in range(n_splits)]
-        fit_times = np.zeros(n_splits)
-        score_times = np.zeros(n_splits)
-        test_scores = np.empty(n_splits)
+        cv_results = {
+            'fit_time': np.zeros(n_splits),
+            'score_time': np.zeros(n_splits),
+            'test_score': np.empty(n_splits)
+        }
 
         if self.return_train_score:
-            train_scores = np.empty(n_splits)
+            cv_results['train_score'] = np.empty(n_splits)
 
         for step in range(self.max_iter):
             for i, (train, test) in enumerate(
-                self._cv.split(self.X, self.y, groups=self.groups)
+                self.cv.split(self.X, self.y, groups=self.groups)
             ):
-                ret = self._partial_fit_and_score(estimators[i], train, test)
+                out = self._partial_fit_and_score(
+                    estimators[i],
+                    train,
+                    test,
+                    partial_fit_params
+                )
 
                 if self.return_train_score:
-                    train_scores[i] = ret.pop(0)
+                    cv_results['train_score'][i] = out.pop(0)
 
-                test_scores[i] = ret[0]
-                fit_times[i] += ret[1]
-                score_times[i] += ret[2]
+                cv_results['test_score'][i] = out[0]
+                cv_results['fit_time'][i] += out[1]
+                cv_results['score_time'][i] += out[2]
 
-            intermediate_value = - np.nanmean(test_scores)
+            intermediate_value = - np.nanmean(cv_results['test_score'])
 
             trial.report(intermediate_value, step=step)
 
@@ -207,15 +217,6 @@ class Objective:
                 raise structs.TrialPruned(
                     'trial was pruned at iteration {}'.format(step)
                 )
-
-        cv_results = {
-            'fit_time': fit_times,
-            'score_time': score_times,
-            'test_score': test_scores
-        }
-
-        if self.return_train_score:
-            cv_results['train_score'] = train_scores
 
         return cv_results
 
@@ -228,11 +229,18 @@ class Objective:
             ) for name, distribution in self.param_distributions.items()
         }
 
-    def _partial_fit_and_score(self, estimator, train, test):
-        # type: (BaseEstimator, List[int], List[int]) -> List[float]
+    def _partial_fit_and_score(
+        self,
+        estimator,
+        train,
+        test,
+        partial_fit_params
+    ):
+        # type: (...) -> List[float]
 
-        X_train, y_train = _safe_split(self.X, self.y, train)
+        X_train, y_train = _safe_split(estimator, self.X, self.y, train)
         X_test, y_test = _safe_split(
+            estimator,
             self.X,
             self.y,
             test,
@@ -242,7 +250,7 @@ class Objective:
         start_time = perf_counter()
 
         try:
-            estimator.partial_fit(X_train, y_train, **self.fit_params)
+            estimator.partial_fit(X_train, y_train, **partial_fit_params)
 
         except Exception as e:
             if self.error_score == 'raise':
@@ -261,11 +269,11 @@ class Objective:
 
         else:
             fit_time = perf_counter() - start_time
-            test_score = self._scorer(estimator, X_test, y_test)
+            test_score = self.scoring(estimator, X_test, y_test)
             score_time = perf_counter() - fit_time - start_time
 
             if self.return_train_score:
-                train_score = self._scorer(estimator, X_train, y_train)
+                train_score = self.scoring(estimator, X_train, y_train)
 
         ret = [test_score, fit_time, score_time]
 
@@ -388,6 +396,9 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
             Time for refitting the best estimator. This is present only if
             ``refit`` is set to :obj:`True`.
 
+        scorer_:
+            Scorer function.
+
         study_:
             Study corresponds to the optimization task.
 
@@ -495,16 +506,6 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
         self._check_is_fitted()
 
         return len(self.study_.trials)
-
-    @property
-    def scorer_(self):
-        # type: () -> Callable[..., float]
-        """Scorer function.
-        """
-
-        self._check_is_fitted()
-
-        return check_scoring(self.estimator, scoring=self.scoring)
 
     @property
     def decision_function(self):
@@ -645,7 +646,7 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
     def _check_is_fitted(self):
         # type: () -> None
 
-        attributes = ['n_splits_', 'study_']
+        attributes = ['n_splits_', 'scorer_', 'study_']
 
         if self.refit:
             attributes += ['best_estimator_', 'refit_time_']
@@ -727,27 +728,29 @@ class TPESearchCV(BaseEstimator, MetaEstimatorMixin):
 
         classifier = is_classifier(self.estimator)
         cv = check_cv(self.cv, y, classifier)
-        objective = Objective(
-            self.estimator,
-            self.param_distributions,
-            X,
-            y,
-            cv=self.cv,
-            error_score=self.error_score,
-            fit_params=fit_params,
-            groups=groups,
-            max_iter=self.max_iter,
-            return_train_score=self.return_train_score,
-            scoring=self.scoring
-        )
 
         self.n_splits_ = cv.get_n_splits(X, y, groups=groups)
+        self.scorer_ = check_scoring(self.estimator, scoring=self.scoring)
         self.study_ = study.create_study(
             load_if_exists=self.load_if_exists,
             pruner=self.pruner,
             sampler=self._sampler,
             storage=self.storage,
             study_name=self.study_name
+        )
+
+        objective = Objective(
+            self.estimator,
+            self.param_distributions,
+            X,
+            y,
+            cv=cv,
+            error_score=self.error_score,
+            fit_params=fit_params,
+            groups=groups,
+            max_iter=self.max_iter,
+            return_train_score=self.return_train_score,
+            scoring=self.scorer_
         )
 
         self.study_.optimize(
