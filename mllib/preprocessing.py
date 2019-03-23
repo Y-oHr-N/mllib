@@ -57,28 +57,14 @@ class Affine(FunctionTransformer):
 
 class Clip(FunctionTransformer):
     @property
-    def _data_max(self):
-        if self.data_max is None:
-            return np.inf
-
-        return self.data_max
-
-    @property
-    def _data_min(self):
-        if self.data_min is None:
-            return - np.inf
-
-        return self.data_min
-
-    @property
     def _kw_args(self):
-        return {'a_min': self._data_min, 'a_max': self._data_max}
+        return {'a_min': self.data_min, 'a_max': self.data_max}
 
     def __init__(
         self,
         accept_sparse=False,
-        data_max=None,
-        data_min=None,
+        data_max=np.inf,
+        data_min=-np.inf,
         validate=True
     ):
         self.data_max = data_max
