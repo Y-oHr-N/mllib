@@ -42,25 +42,23 @@ class TrainingTimeCurve(ModelVisualizer):
             self.train_sizes,
             n_samples
         )
-        self.fit_times_ = np.asarray(
-            [
-                compute_execution_time(
-                    self.estimator.fit,
-                    safe_indexing(X, slice(0, n_train_samples)),
-                    safe_indexing(y, slice(0, n_train_samples)),
-                    n_trials=self.n_trials,
-                    **fit_params
-                ) for n_train_samples in self.train_sizes_abs_
-            ]
-        )
+        self.fit_times_ = np.asarray([
+            compute_execution_time(
+                self.estimator.fit,
+                safe_indexing(X, slice(0, n_train_samples)),
+                safe_indexing(y, slice(0, n_train_samples)),
+                n_trials=self.n_trials,
+                **fit_params
+            ) for n_train_samples in self.train_sizes_abs_
+        ])
 
         self.draw()
 
         return self
 
     def draw(self, **kwargs):
-        kwargs['label'] = self.estimator.__class__.__name__
-        kwargs['marker'] = 'o'
+        kwargs.setdefault('label', self.estimator.__class__.__name__)
+        kwargs.setdefault('marker', 'o')
 
         self.ax.plot(self.train_sizes_abs_, self.fit_times_, **kwargs)
 
@@ -72,11 +70,11 @@ class TrainingTimeCurve(ModelVisualizer):
         ymin = 0.9 * np.min(self.fit_times_)
         ymax = 1.1 * np.max(self.fit_times_)
 
-        kwargs['xlabel'] = 'Number of training samples'
-        kwargs['xlim'] = (xmin, xmax)
-        kwargs['ylabel'] = 'Time'
-        kwargs['ylim'] = (ymin, ymax)
-        kwargs['yscale'] = 'log'
+        kwargs.setdefault('xlabel', 'Number of training samples')
+        kwargs.setdefault('xlim', (xmin, xmax))
+        kwargs.setdefault('ylabel', 'Time')
+        kwargs.setdefault('ylim', (ymin, ymax))
+        kwargs.setdefault('yscale', 'log')
 
         self.set_title()
         self.ax.grid(which='both')
