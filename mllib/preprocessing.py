@@ -1,5 +1,11 @@
+from collections import Counter
+
 import numpy as np
+from sklearn.base import TransformerMixin
 from sklearn.preprocessing import FunctionTransformer
+from sklearn.utils.validation import check_array, check_is_fitted
+
+from .base import BaseEstimator
 
 
 def affine(X, A=1.0, b=0.0, inverse=False):
@@ -124,3 +130,39 @@ class Round(FunctionTransformer):
         super().set_params(**params)
 
         self.kw_args = self._kw_args
+
+
+class CountEncoder(BaseEstimator, TransformerMixin):
+    def __init__(self, dtype=np.float64):
+        self.dtype = dtype
+
+    def _check_params(self):
+        try:
+            _ = np.dtype(self.dtype)
+        except TypeError as e:
+            raise ValueError(f'dtype must be a data type object') from e
+
+    def _check_is_fitted(self):
+        check_is_fitted(self, 'counters_')
+
+    def fit(self, X, y=None):
+        X = check_array(X, allow_nd=True, dtype=None, estimator=self)
+
+        self.counters_ = [Counter(column) for column in X.T]
+
+        return self
+
+    def transform(self, X):
+        self._check_is_fitted()
+
+        X = check_array(X, allow_nd=True, dtype=None, estimator=self)
+        Xt = np.empty_like(X, dtype=self.dtype)
+        vectorized = np.vectorize(
+            lambda counter, xj: counter[xj],
+            excluded='counter'
+        )
+
+        for j, column in enumerate(X.T):
+            Xt[:, j] = vectorized(self.counters_[j], column)
+
+        return Xt
