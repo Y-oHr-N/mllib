@@ -24,6 +24,10 @@ def is_estimator(estimator):
     return hasattr(estimator, 'fit')
 
 
+def is_incremental_estimator(estimator):
+    return hasattr(estimator, 'partial_fit')
+
+
 def is_lgbm_model(estimator):
     if not lgb_is_installed:
         return False
