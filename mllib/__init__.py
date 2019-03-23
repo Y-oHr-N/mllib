@@ -1,9 +1,9 @@
 import logging
 
 from . import base # noqa
-from . import bsgd # noqa
 from . import compose # noqa
 from . import ensemble # noqa
+from . import kernel_model # noqa
 from . import metrics # noqa
 from . import model_selection # noqa
 from . import preprocessing # noqa
