@@ -23,8 +23,12 @@ class BaseRandomSeedAveraging(BaseEnsemble):
     # TODO: add a verbose parameter
 
     @property
-    def _check_params(self):
-        return self._validate_estimator
+    def feature_importances_(self):
+        self._check_is_fitted()
+
+        all_importances = [e.feature_importances_ for e in self.estimators_]
+
+        return np.average(all_importances, axis=0)
 
     @abstractmethod
     def __init__(
@@ -39,6 +43,19 @@ class BaseRandomSeedAveraging(BaseEnsemble):
         )
 
         self.random_state = random_state
+
+    def _check_params(self):
+        self._validate_estimator()
+
+        if not is_estimator(self.base_estimator):
+            raise ValueError(
+                f'base_estimator must be a scikit-learn estimator'
+            )
+
+        if not hasattr(self.base_estimator, 'random_state'):
+            raise ValueError(
+                f'base_estimator must have random_state'
+            )
 
     def _check_is_fitted(self):
         check_is_fitted(self, 'estimators_')
