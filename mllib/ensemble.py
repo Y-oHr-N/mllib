@@ -1,26 +1,25 @@
-import warnings
 from abc import abstractmethod
+import warnings
 
 import numpy as np
 from scipy import stats
-from sklearn.base import (
-    ClassifierMixin,
-    MetaEstimatorMixin,
-    RegressorMixin,
-    clone,
-    is_classifier,
-    is_regressor
-)
+from sklearn.base import ClassifierMixin
+from sklearn.base import clone
+from sklearn.base import is_classifier
+from sklearn.base import is_regressor
+from sklearn.base import MetaEstimatorMixin
+from sklearn.base import RegressorMixin
 from sklearn.ensemble import BaseEnsemble
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
 
-from .base import BaseEstimator, is_estimator
+from .base import BaseEstimator
+from .base import is_estimator
 
 
 class BaseRandomSeedAveraging(BaseEnsemble):
-    # TODO: add a n_jobs parameter
-    # TODO: add a verbose parameter
+    # TODO(Kon): add a n_jobs parameter
+    # TODO(Kon): add a verbose parameter
 
     @property
     def feature_importances_(self):

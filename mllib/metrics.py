@@ -1,5 +1,6 @@
 import numpy as np
-from sklearn.metrics import mean_squared_error, mean_squared_log_error
+from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_log_error
 from sklearn.metrics.regression import _check_reg_targets
 
 from .utils import check_sample_weight

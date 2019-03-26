@@ -1,27 +1,26 @@
-import sys
 from abc import abstractmethod
-from typing import Tuple, Union
+import sys
+from typing import Tuple
+from typing import Union
 
 import numpy as np
 from sklearn.base import RegressorMixin
-from sklearn.linear_model.sgd_fast import (
-    EpsilonInsensitive,
-    Huber,
-    LossFunction,
-    SquaredLoss
-)
+from sklearn.linear_model.sgd_fast import EpsilonInsensitive
+from sklearn.linear_model.sgd_fast import Huber
+from sklearn.linear_model.sgd_fast import LossFunction
+from sklearn.linear_model.sgd_fast import SquaredLoss
 from sklearn.metrics.pairwise import pairwise_kernels
-from sklearn.utils import (
-    check_X_y,
-    check_array,
-    check_random_state,
-    gen_batches
-)
+from sklearn.utils import check_array
+from sklearn.utils import check_random_state
+from sklearn.utils import check_X_y
+from sklearn.utils import gen_batches
 from sklearn.utils.validation import check_is_fitted
-from tqdm import tqdm, trange
+from tqdm import tqdm
+from tqdm import trange
 
 from .base import BaseEstimator
-from .utils import check_sample_weight, safe_indexing
+from .utils import check_sample_weight
+from .utils import safe_indexing
 
 LOSS_CLASSES = {
     'epsilon_insensitive': EpsilonInsensitive,
@@ -288,19 +287,19 @@ def _decision_function(
 
 
 class BaseSGD(BaseEstimator):
-    # TODO: add a BNormaClassifier class
-    # TODO: add a BNormaRegressor class
-    # TODO: add a BPegasosClassifier class
-    # TODO: add a BPegasosRegressor class
-    # TODO: add a batch_size parameter
-    # TODO: add a n_iter_no_change parameter
-    # TODO: add a n_jobs parameter
-    # TODO: add a strategy parameter
-    # TODO: add a tol parameter
-    # TODO: correct the shape of a dual_coef_ attribute
-    # TODO: correct the shape of a intercept_ attribute
-    # TODO: implement a bsgd function with Cython (or Numba)
-    # TODO: implement a nbsgd function
+    # TODO(Kon): add a BNormaClassifier class
+    # TODO(Kon): add a BNormaRegressor class
+    # TODO(Kon): add a BPegasosClassifier class
+    # TODO(Kon): add a BPegasosRegressor class
+    # TODO(Kon): add a batch_size parameter
+    # TODO(Kon): add a n_iter_no_change parameter
+    # TODO(Kon): add a n_jobs parameter
+    # TODO(Kon): add a strategy parameter
+    # TODO(Kon): add a tol parameter
+    # TODO(Kon): correct the shape of a dual_coef_ attribute
+    # TODO(Kon): correct the shape of a intercept_ attribute
+    # TODO(Kon): implement a bsgd function with Cython (or Numba)
+    # TODO(Kon): implement a nbsgd function
 
     @abstractmethod
     def __init__(

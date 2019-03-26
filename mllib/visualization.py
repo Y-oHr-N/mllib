@@ -1,11 +1,12 @@
 import numpy as np
 from sklearn.model_selection._validation import _translate_train_sizes
 
-from .utils import compute_execution_time, safe_indexing
+from .utils import compute_execution_time
+from .utils import safe_indexing
 
 try:
-    from yellowbrick import reset_orig
     from yellowbrick.base import ModelVisualizer
+    from yellowbrick import reset_orig
 
     reset_orig()
 

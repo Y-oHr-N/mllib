@@ -3,7 +3,8 @@ from collections import Counter
 import numpy as np
 from sklearn.base import TransformerMixin
 from sklearn.preprocessing import FunctionTransformer
-from sklearn.utils.validation import check_array, check_is_fitted
+from sklearn.utils.validation import check_array
+from sklearn.utils.validation import check_is_fitted
 
 from .base import BaseEstimator
 

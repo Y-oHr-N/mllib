@@ -4,13 +4,11 @@ import numpy as np
 from sklearn.utils import safe_indexing as sklearn_safe_indexing
 
 try:
-    from optuna.distributions import (
-        CategoricalDistribution,
-        DiscreteUniformDistribution,
-        IntUniformDistribution,
-        LogUniformDistribution,
-        UniformDistribution
-    )
+    from optuna.distributions import CategoricalDistribution
+    from optuna.distributions import DiscreteUniformDistribution
+    from optuna.distributions import IntUniformDistribution
+    from optuna.distributions import LogUniformDistribution
+    from optuna.distributions import UniformDistribution
 
     optuna_is_installed = True
 
@@ -56,8 +54,7 @@ def compute_execution_time(func, *args, **kwargs):
 
 
 def get_param_distributions(estimator_name, prefix=None):
-    """Get a dictionary where keys are parameters and values are
-    distributions.
+    """Get distributions of parameters.
 
     Examples
     --------
