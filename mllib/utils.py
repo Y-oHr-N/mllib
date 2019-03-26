@@ -3,17 +3,12 @@ from time import perf_counter
 import numpy as np
 from sklearn.utils import safe_indexing as sklearn_safe_indexing
 
-try:
-    from optuna.distributions import CategoricalDistribution
-    from optuna.distributions import DiscreteUniformDistribution
-    from optuna.distributions import IntUniformDistribution
-    from optuna.distributions import LogUniformDistribution
-    from optuna.distributions import UniformDistribution
-
-    optuna_is_installed = True
-
-except ImportError:
-    optuna_is_installed = False
+from .compat import CategoricalDistribution
+from .compat import DiscreteUniformDistribution
+from .compat import IntUniformDistribution
+from .compat import LogUniformDistribution
+from .compat import OPTUNA_IS_INSTALLED
+from .compat import UniformDistribution
 
 DEFAULT_N_TRIALS = 10
 
@@ -64,7 +59,7 @@ def get_param_distributions(estimator_name, prefix=None):
     >>> param_distributions = get_param_distributions(clf.__class__.__name__)
     """
 
-    if not optuna_is_installed:
+    if not OPTUNA_IS_INSTALLED:
         raise ImportError('optuna is not installed')
 
     dict_of_param_distributions = {
