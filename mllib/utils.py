@@ -167,3 +167,19 @@ def safe_indexing(X, indices):
         return X
     else:
         return sklearn_safe_indexing(X, indices)
+
+
+def type_of_data(X):
+    categorical_columns = get_categorical_columns(X)
+    numerical_columns = get_numerical_columns(X)
+
+    if len(categorical_columns) > 0:
+        if len(numerical_columns) > 0:
+            return 'mixed'
+        else:
+            return 'categorical'
+    else:
+        if len(numerical_columns) > 0:
+            return 'numerical'
+        else:
+            return 'unknown'
