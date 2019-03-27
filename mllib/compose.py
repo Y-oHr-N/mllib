@@ -104,6 +104,19 @@ def make_regressor(X_type='numerical', y_type='continuous'):
 
 
 def make_model(X_type, y_type, encode='onehot', scale='standard'):
+    """Make a benchmark model.
+
+    Examples
+    --------
+    >>> from sklearn.datasets import load_iris
+    >>> from sklearn.utils.multiclass import type_of_target
+    >>> from mllib.utils import type_of_data
+    >>> X, y = load_iris(return_X_y=True)
+    >>> X_type = type_of_data(X)
+    >>> y_type = type_of_target(y)
+    >>> model = make_model(X_type, y_type)
+    """
+
     preprocessor = make_preprocessor(X_type, y_type, encode, scale)
 
     if y_type in ['binary', 'multiclass', 'multiclass-output']:
