@@ -110,11 +110,14 @@ def make_model(X_type, y_type, encode='onehot', scale='standard'):
     --------
     >>> from sklearn.datasets import load_iris
     >>> from sklearn.utils.multiclass import type_of_target
+    >>> from mllib.compose import make_model
     >>> from mllib.utils import type_of_data
     >>> X, y = load_iris(return_X_y=True)
     >>> X_type = type_of_data(X)
     >>> y_type = type_of_target(y)
     >>> model = make_model(X_type, y_type)
+    >>> model.predict(X, y)
+    Pipeline(...)
     """
 
     preprocessor = make_preprocessor(X_type, y_type, encode, scale)
