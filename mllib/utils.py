@@ -48,6 +48,14 @@ def compute_execution_time(func, *args, **kwargs):
     return (perf_counter() - start_time) / n_trials
 
 
+def get_categorical_columns(X):
+    return X.select_dtypes('category').columns
+
+
+def get_numerical_columns(X):
+    return X.select_dtypes('number').columns
+
+
 def get_param_distributions(estimator_name, prefix=None):
     """Get distributions of parameters.
 
