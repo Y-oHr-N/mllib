@@ -1,6 +1,7 @@
 from time import perf_counter
 
 import numpy as np
+from sklearn.utils import check_array
 from sklearn.utils import safe_indexing as sklearn_safe_indexing
 
 from .compat import CategoricalDistribution
@@ -49,11 +50,28 @@ def compute_execution_time(func, *args, **kwargs):
 
 
 def get_categorical_columns(X):
-    return X.select_dtypes('category').columns
+    if hasattr(X, 'select_dtypes'):
+        X_sel = X.select_dtypes('category')
+
+        return list(X_sel.columns)
+
+    else:
+        X = check_array(X, allow_nd=True, dtype=None)
+
+        return list()
 
 
 def get_numerical_columns(X):
-    return X.select_dtypes('number').columns
+    if hasattr(X, 'select_dtypes'):
+        X_sel = X.select_dtypes('number')
+
+        return list(X_sel.columns)
+
+    else:
+        X = check_array(X, allow_nd=True, dtype=None)
+        _, n_features = X.shape
+
+        return list(range(n_features))
 
 
 def get_param_distributions(estimator_name, prefix=None):
