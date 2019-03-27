@@ -4,10 +4,10 @@ import numpy as np
 from sklearn.utils import safe_indexing as sklearn_safe_indexing
 
 from .compat import CategoricalDistribution
+from .compat import check_optuna_availability
 from .compat import DiscreteUniformDistribution
 from .compat import IntUniformDistribution
 from .compat import LogUniformDistribution
-from .compat import OPTUNA_IS_INSTALLED
 from .compat import UniformDistribution
 
 DEFAULT_N_TRIALS = 10
@@ -67,8 +67,7 @@ def get_param_distributions(estimator_name, prefix=None):
     >>> param_distributions = get_param_distributions(clf.__class__.__name__)
     """
 
-    if not OPTUNA_IS_INSTALLED:
-        raise ImportError('optuna is not installed')
+    check_optuna_availability()
 
     dict_of_param_distributions = {
         'KBinsDiscretizer': {

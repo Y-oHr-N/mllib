@@ -4,10 +4,10 @@ from abc import abstractmethod
 from sklearn.base import BaseEstimator as SKLearnBaseEstimator
 from sklearn.externals.joblib import dump
 
-from .compat import LGB_IS_INSTALLED
 from .compat import LGBMModel
-from .compat import XGB_IS_INSTALLED
+from .compat import LIGHTGBM_IS_INSTALLED
 from .compat import XGBModel
+from .compat import XGBOOST_IS_INSTALLED
 
 
 def is_estimator(estimator):
@@ -19,7 +19,7 @@ def is_incremental_estimator(estimator):
 
 
 def is_lgbm_model(estimator):
-    if not LGB_IS_INSTALLED:
+    if not LIGHTGBM_IS_INSTALLED:
         return False
 
     while hasattr(estimator, '_final_estimator'):
@@ -29,7 +29,7 @@ def is_lgbm_model(estimator):
 
 
 def is_xgb_model(estimator):
-    if not XGB_IS_INSTALLED:
+    if not XGBOOST_IS_INSTALLED:
         return False
 
     while hasattr(estimator, '_final_estimator'):

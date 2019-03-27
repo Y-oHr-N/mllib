@@ -1,12 +1,13 @@
 try:
     from lightgbm import LGBMModel
 
-    LGB_IS_INSTALLED = True
+    LIGHTGBM_IS_INSTALLED = True
 
-except ImportError:
+except ImportError as e:
     LGBMModel = object
 
-    LGB_IS_INSTALLED = False
+    LIGHTGBM_IS_INSTALLED = False
+    LIGHTGBM_IMPORT_ERROR = e
 
 try:
     from optuna.distributions import CategoricalDistribution
@@ -17,7 +18,7 @@ try:
 
     OPTUNA_IS_INSTALLED = True
 
-except ImportError:
+except ImportError as e:
     CategoricalDistribution = object
     DiscreteUniformDistribution = object
     IntUniformDistribution = object
@@ -25,16 +26,18 @@ except ImportError:
     UniformDistribution = object
 
     OPTUNA_IS_INSTALLED = False
+    OPTUNA_IMPORT_ERROR = e
 
 try:
     from xgboost import XGBModel
 
-    XGB_IS_INSTALLED = True
+    XGBOOST_IS_INSTALLED = True
 
-except ImportError:
+except ImportError as e:
     XGBModel = object
 
-    XGB_IS_INSTALLED = False
+    XGBOOST_IS_INSTALLED = False
+    XGBOOST_IMPORT_ERROR = e
 
 try:
     from yellowbrick.base import ModelVisualizer
@@ -42,8 +45,29 @@ try:
 
     YELLOWBRICK_IS_INSTALLED = True
 
-except ImportError:
+except ImportError as e:
     ModelVisualizer = object
     reset_orig = None
 
     YELLOWBRICK_IS_INSTALLED = False
+    YELLOWBRICK_IMPORT_ERROR = e
+
+
+def check_lightgbm_availability():
+    if not LIGHTGBM_IS_INSTALLED:
+        raise LIGHTGBM_IMPORT_ERROR
+
+
+def check_optuna_availability():
+    if not OPTUNA_IS_INSTALLED:
+        raise OPTUNA_IMPORT_ERROR
+
+
+def check_xgboost_availability():
+    if not XGBOOST_IS_INSTALLED:
+        raise XGBOOST_IMPORT_ERROR
+
+
+def check_yellowbrick_availability():
+    if not YELLOWBRICK_IS_INSTALLED:
+        raise YELLOWBRICK_IMPORT_ERROR

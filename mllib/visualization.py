@@ -1,9 +1,9 @@
 import numpy as np
 from sklearn.model_selection._validation import _translate_train_sizes
 
+from .compat import check_yellowbrick_availability
 from .compat import ModelVisualizer
 from .compat import reset_orig
-from .compat import YELLOWBRICK_IS_INSTALLED
 from .utils import compute_execution_time
 from .utils import safe_indexing
 
@@ -19,8 +19,7 @@ class TrainingTimeCurve(ModelVisualizer):
         title='Training time curve',
         train_sizes=DEFAULT_TRAIN_SIZES
     ):
-        if not YELLOWBRICK_IS_INSTALLED:
-            raise ImportError('yellowbrick is not installed')
+        check_yellowbrick_availability()
 
         super().__init__(estimator, ax=ax, title=title)
 
