@@ -5,9 +5,9 @@ ARG NB_UID=1000
 ENV USER ${NB_USER}
 ENV NB_UID ${NB_UID}
 ENV HOME /home/${NB_USER}
+ENV PATH ${HOME}/.local/bin:${PATH}
 
-# Install the notebook package
-RUN pip install notebook
+USER root
 
 # Create a user with a home directory
 RUN adduser --disabled-password \
@@ -15,14 +15,14 @@ RUN adduser --disabled-password \
     --uid ${NB_UID} \
     ${NB_USER}
 
-WORKDIR ${HOME}
-
-USER root
-
 # Make sure the contents of our repo are in ${HOME}
 COPY . ${HOME}
 RUN chown -R ${NB_UID} ${HOME}
 
-RUN pip install .
-
 USER ${USER}
+
+WORKDIR ${HOME}
+
+# Install the packages
+RUN pip install --user --quiet notebook
+RUN pip install --user --quiet .[develop]
