@@ -6,6 +6,9 @@ ENV USER ${NB_USER}
 ENV NB_UID ${NB_UID}
 ENV HOME /home/${NB_USER}
 
+# Install the notebook package
+RUN pip install notebook
+
 # Create a user with a home directory
 RUN adduser --disabled-password \
     --gecos "Default user" \
@@ -20,8 +23,6 @@ USER root
 COPY . ${HOME}
 RUN chown -R ${NB_UID} ${HOME}
 
-# Install the packages
-RUN pip install notebook
 RUN pip install .
 
 USER ${USER}
